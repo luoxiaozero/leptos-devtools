@@ -1,0 +1,13 @@
+[package]
+name = "leptos_devtools"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
+tracing-subscriber-wasm = "0.1.0"
+regex = "1.9.1"
+leptos_devtools_extension_api = { path = "../extension_api" }

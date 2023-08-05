@@ -1,0 +1,2 @@
+[workspace]
+members = ["devtools", "example", "extension_api"]
