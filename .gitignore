@@ -14,3 +14,7 @@ Cargo.lock
 *.pdb
 
 example/dist
+
+# pnpm
+node_modules
+pnpm-lock.yaml
