@@ -21,8 +21,7 @@ fn on_message(cb: impl Fn(OnMessage) + 'static) -> Result<(), JsValue> {
     }
 
     wel(Box::new(move |ev| {
-        let message: OnMessage = ev.data().into();
-        if message.id == LEPTOS_DEVTOOLS_ON_MESSAGE {
+        if let Some(message) = OnMessage::from_js_value(ev.data()) {
             cb(message)
         }
     }))
@@ -68,10 +67,13 @@ impl OnMessage {
     pub fn on_message(cb: impl Fn(OnMessage) + 'static) -> Result<(), JsValue> {
         on_message(cb)
     }
-}
 
-impl From<JsValue> for OnMessage {
-    fn from(value: JsValue) -> Self {
-        serde_wasm_bindgen::from_value(value).unwrap()
+    pub fn from_js_value(value: JsValue) -> Option<Self> {
+        let message: OnMessage = serde_wasm_bindgen::from_value(value).ok()?;
+        if message.id == LEPTOS_DEVTOOLS_ON_MESSAGE {
+            Some(message)
+        } else {
+            None
+        }
     }
 }

@@ -16,6 +16,7 @@ export default defineManifest({
         service_worker: "background/background.ts",
         type: "module",
     },
+    devtools_page: "devtools/devtools.html",
     icons: {
         "48": "assets/icons/leptos-logo-48.png",
     },
