@@ -1,2 +1,2 @@
 [workspace]
-members = ["devtools", "example", "extension_api"]
+members = ["devtools", "example", "extension_api", "extension_devtools"]
