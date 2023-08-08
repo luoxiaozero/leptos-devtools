@@ -1,5 +1,9 @@
-use std::{cell::RefCell, collections::{HashMap, HashSet}};
 use crate::component::Component;
+use leptos_devtools_extension_api::{OnEvent, OnMessage};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+};
 use tracing::span;
 
 thread_local! {
@@ -15,6 +19,9 @@ pub(crate) struct Runtime {
     pub component_tree_root: RefCell<Vec<span::Id>>,
     pub component_tree: RefCell<HashMap<span::Id, Vec<span::Id>>>,
     pub component_tree_set: RefCell<HashSet<span::Id>>,
+
+    // extension
+    pub show_devtools: RefCell<bool>
 }
 
 pub(crate) fn with_runtime<T>(f: impl FnOnce(&Runtime) -> T) -> T {
@@ -23,15 +30,12 @@ pub(crate) fn with_runtime<T>(f: impl FnOnce(&Runtime) -> T) -> T {
 
 pub(crate) struct Owner {
     pub id: span::Id,
-    pub parent_id: Option<span::Id>
+    pub parent_id: Option<span::Id>,
 }
 
 impl Owner {
     pub fn new(id: span::Id, parent_id: Option<span::Id>) -> Self {
-        Self {
-            id,
-            parent_id
-        }
+        Self { id, parent_id }
     }
 }
 
@@ -53,4 +57,19 @@ pub fn remove_component_children(id: &span::Id) {
             remove_component_children(id);
         })
     }
+}
+
+pub fn on_message() {
+    OnMessage::on_message(|OnMessage { payload, .. }| {
+        for event in payload {
+            match event {
+                OnEvent::ShowDevtools(status) => {
+                    with_runtime(|runtime| {
+                        *runtime.show_devtools.borrow_mut() = status;
+                    });
+                },
+            }
+        }
+    })
+    .unwrap();
 }

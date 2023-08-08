@@ -1,8 +1,10 @@
-use crate::Event;
+use crate::{Event, OnEvent};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 const LEPTOS_DEVTOOLS_MESSAGE: &str = "LEPTOS_DEVTOOLS_MESSAGE";
+const LEPTOS_DEVTOOLS_ON_MESSAGE: &str = "LEPTOS_DEVTOOLS_ON_MESSAGE";
 
 thread_local! {
     static WINDOW: web_sys::Window = web_sys::window().unwrap_throw();
@@ -10,6 +12,20 @@ thread_local! {
 
 fn post_message(message: &wasm_bindgen::JsValue) -> Result<(), JsValue> {
     WINDOW.with(|window| window.post_message(message, "*"))
+}
+
+fn on_message(cb: impl Fn(OnMessage) + 'static) -> Result<(), JsValue> {
+    fn wel(cb: Box<dyn FnMut(web_sys::MessageEvent)>) -> Result<(), JsValue> {
+        let cb = Closure::wrap(cb).into_js_value();
+        WINDOW.with(|window| window.add_event_listener_with_callback("message", cb.unchecked_ref()))
+    }
+
+    wel(Box::new(move |ev| {
+        let message: OnMessage = ev.data().into();
+        if message.id == LEPTOS_DEVTOOLS_ON_MESSAGE {
+            cb(message)
+        }
+    }))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -37,6 +53,24 @@ impl Message {
 }
 
 impl From<JsValue> for Message {
+    fn from(value: JsValue) -> Self {
+        serde_wasm_bindgen::from_value(value).unwrap()
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct OnMessage {
+    id: String,
+    pub payload: Vec<OnEvent>,
+}
+
+impl OnMessage {
+    pub fn on_message(cb: impl Fn(OnMessage) + 'static) -> Result<(), JsValue> {
+        on_message(cb)
+    }
+}
+
+impl From<JsValue> for OnMessage {
     fn from(value: JsValue) -> Self {
         serde_wasm_bindgen::from_value(value).unwrap()
     }

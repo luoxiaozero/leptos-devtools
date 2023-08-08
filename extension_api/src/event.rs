@@ -14,3 +14,8 @@ impl Event {
         message
     }
 }
+
+#[derive(Serialize, Deserialize)]
+pub enum OnEvent {
+    ShowDevtools(bool),
+}

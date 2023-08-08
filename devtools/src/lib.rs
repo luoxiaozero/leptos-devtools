@@ -3,10 +3,12 @@ mod runtime;
 mod extension;
 mod component;
 
-pub use devtools::Devtools;
+use devtools::Devtools;
+use runtime::on_message;
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
 
 pub fn devtools() {
+    on_message();
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .without_time()

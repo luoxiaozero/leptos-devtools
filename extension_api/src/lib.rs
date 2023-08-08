@@ -3,8 +3,8 @@ mod event;
 mod message;
 
 pub use component::{Component, ComponentChildrenRemove};
-pub use event::Event;
-pub use message::Message;
+pub use event::{Event, OnEvent};
+pub use message::{Message, OnMessage};
 pub use web_sys::console::log_1;
 
 #[macro_export]
