@@ -1,0 +1,56 @@
+.flex {
+    display: flex;
+}
+
+.flex-1 {
+    flex: 1 1 0%;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.w-16px {
+    width: 16px;
+}
+
+.h-screen {
+    height: 100vh;
+}
+
+.p-8px {
+    padding: 8px;
+}
+
+body {
+    margin: 0;
+}
+
+.node {
+    font-size: 14px;
+    line-height: 22px;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.node:hover {
+    background-color: #f3f3f5;
+}
+
+.node-selected {
+    background-color: #ccc4;
+}
+
+.node-component__name {
+    color: #2080f0;
+}
+
+.arrow-right {
+    display: inline-block;
+    width: 0;
+    height: 0;
+
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 6px solid #2c3e50;
+}

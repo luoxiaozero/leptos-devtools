@@ -17,6 +17,9 @@ export default defineManifest({
         type: "module",
     },
     devtools_page: "devtools/devtools.html",
+    content_security_policy: {
+        extension_pages: "script-src 'self' 'wasm-unsafe-eval'; default-src 'self';",
+    },
     icons: {
         "48": "assets/icons/leptos-logo-48.png",
     },

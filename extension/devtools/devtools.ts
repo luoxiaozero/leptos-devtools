@@ -2,8 +2,6 @@ import { LEPTOS_DEVTOOLS_DEVTOOLS } from "../utils/constant"
 
 const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_DEVTOOLS })
 
-console.log(chrome.devtools, chrome.devtools.inspectedWindow, chrome.devtools.inspectedWindow.tabId)
-
 port.postMessage({
     payload: [
         {

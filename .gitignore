@@ -14,6 +14,7 @@ Cargo.lock
 *.pdb
 
 example/dist
+extension_devtools/dist
 
 # pnpm
 /extension/dist

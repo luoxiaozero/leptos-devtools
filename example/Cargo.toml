@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-leptos = { version = "0.5.0-alpha2", features = ["nightly", "csr", "tracing"] }
+leptos = { version = "0.5.0-beta", features = ["nightly", "csr", "tracing"] }
 leptos_devtools = { path = "../devtools" }
