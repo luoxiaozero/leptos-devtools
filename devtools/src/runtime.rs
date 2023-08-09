@@ -28,6 +28,7 @@ pub(crate) fn with_runtime<T>(f: impl FnOnce(&Runtime) -> T) -> T {
     RUNTIME.with(|runtime| f(runtime))
 }
 
+#[derive(Debug)]
 pub(crate) struct Owner {
     pub id: span::Id,
     pub parent_id: Option<span::Id>,

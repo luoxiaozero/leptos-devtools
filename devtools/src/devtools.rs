@@ -80,10 +80,18 @@ where
 
     fn on_exit(&self, id: &span::Id, ctx: Context<'_, S>) {
         with_runtime(|runtime| {
-            let components = runtime.components.borrow();
-            if !components.contains_key(id) {
-                return;
-            }
+            let is_dyn_child = {
+                let components = runtime.components.borrow();
+                let Some(comp) = components.get(id) else {
+                    return;
+                };
+                if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child"
+                {
+                    true
+                } else {
+                    false
+                }
+            };
 
             let mut ancestors = runtime.ancestors.borrow_mut();
             let mut component_tree_set = runtime.component_tree_set.borrow_mut();
@@ -108,6 +116,15 @@ where
                 return;
             }
 
+            if is_dyn_child {
+                let mut owner = runtime.owner.borrow_mut();
+                if owner.as_ref().map_or(false, |o| &o.id == id) {
+                    if let Some(Owner { id, parent_id }) = owner.take() {
+                        post_message(|| extension::generate_extension_component(&id, parent_id));
+                    }
+                }
+                
+            }
             if !component_tree_set.contains(id) {
                 let parent_id = ancestors.last().expect("ancestors is empty");
                 let mut component_tree = runtime.component_tree.borrow_mut();
