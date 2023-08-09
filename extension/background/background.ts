@@ -36,6 +36,14 @@ chrome.runtime.onConnect.addListener(port => {
                 devtoolsPort.postMessage(message)
             }
         })
+        port.onDisconnect.addListener(port => {
+            for (const [key, value] of contentPortMap.entries()) {
+                if (port === value) {
+                    contentPortMap.delete(key)
+                    break
+                }
+            }
+        })
     } else if (port.name === LEPTOS_DEVTOOLS_DEVTOOLS_HTML) {
         port.onMessage.addListener((message, port) => {
             if (
@@ -59,6 +67,14 @@ chrome.runtime.onConnect.addListener(port => {
                 }
             }
         })
+        port.onDisconnect.addListener(port => {
+            for (const [key, value] of devtoolsHtmlPortMap.entries()) {
+                if (port === value) {
+                    devtoolsHtmlPortMap.delete(key)
+                    break
+                }
+            }
+        })
     } else if (port.name === LEPTOS_DEVTOOLS_DEVTOOLS) {
         port.onMessage.addListener((message, port) => {
             if (
@@ -71,6 +87,25 @@ chrome.runtime.onConnect.addListener(port => {
                     return
                 }
                 devtoolsPortMap.set(tabId, port)
+                const contentPort = contentPortMap.get(tabId)
+                if (contentPort) {
+                    contentPort.postMessage({
+                        id: LEPTOS_DEVTOOLS_MESSAGE,
+                        payload: [
+                            {
+                                ShowDevtools: true,
+                            },
+                        ],
+                    })
+                }
+            }
+        })
+        port.onDisconnect.addListener(port => {
+            for (const [key, value] of devtoolsPortMap.entries()) {
+                if (port === value) {
+                    devtoolsPortMap.delete(key)
+                    break
+                }
             }
         })
     }

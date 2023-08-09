@@ -1,7 +1,7 @@
-use crate::component::merge_component;
+use crate::component::{merge_component, remove_component_children};
 use chrome_wasm_bindgen::*;
 use leptos::*;
-use leptos_devtools_extension_api::{Event, Message};
+use leptos_devtools_extension_api::{ComponentChildrenRemove, Event, Message};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
 pub(crate) fn chrome() -> Option<Chrome> {
@@ -28,7 +28,10 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
                     merge_component(comp.clone());
                     component_update = true;
                 }
-                Event::ComponentChildrenRemove(_) => {}
+                Event::ComponentChildrenRemove(ComponentChildrenRemove { id, deep }) => {
+                    remove_component_children(&id, deep);
+                    component_update = true
+                }
                 Event::TabId(_) => {}
             }
         }

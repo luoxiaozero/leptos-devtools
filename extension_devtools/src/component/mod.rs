@@ -4,8 +4,8 @@ mod tree;
 use component_node::ComponentNode;
 use leptos::*;
 use std::num::NonZeroU64;
-pub use tree::merge_component;
 use tree::with_component_store;
+pub use tree::{merge_component, remove_component_children};
 
 pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<(NonZeroU64, View)> {
     let mut views = vec![];

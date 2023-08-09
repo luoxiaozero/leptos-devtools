@@ -1,6 +1,5 @@
-use std::{cell::RefCell, collections::HashMap, num::NonZeroU64};
 use leptos_devtools_extension_api::Component;
-
+use std::{cell::RefCell, collections::HashMap, num::NonZeroU64};
 
 thread_local! {
     pub(crate) static COMPONENT_STORE: ComponentStore = Default::default();
@@ -16,7 +15,6 @@ pub(crate) struct ComponentStore {
 pub(crate) fn with_component_store<T>(f: impl FnOnce(&ComponentStore) -> T) -> T {
     COMPONENT_STORE.with(|store| f(store))
 }
-
 
 pub fn merge_component(mut comp: Component) {
     with_component_store(|store| {
@@ -38,4 +36,23 @@ pub fn merge_component(mut comp: Component) {
 
         store.components.borrow_mut().insert(comp.id, comp);
     })
+}
+pub fn remove_component_children(id: &NonZeroU64, deep: bool) {
+    let children = with_component_store(|store| {
+        let Some(ids) = store.tree.borrow_mut().remove(id) else {
+            return None;
+        };
+
+        ids.iter().for_each(|id| {
+            store.components.borrow_mut().remove(id);
+        });
+
+        Some(ids)
+    });
+
+    if let Some(children) = children {
+        children.iter().for_each(|id| {
+            remove_component_children(id, deep);
+        })
+    }
 }
