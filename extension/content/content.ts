@@ -11,7 +11,7 @@ window.addEventListener("message", ev => {
     }
 
     if (ev.data.id && ev.data.id === LEPTOS_DEVTOOLS_MESSAGE) {
-        port.postMessage(ev)
+        port.postMessage(ev.data)
     }
 })
 
