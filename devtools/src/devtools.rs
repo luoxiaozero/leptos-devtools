@@ -1,7 +1,7 @@
 use crate::{
     component::Component,
     extension,
-    runtime::{remove_component_children, with_runtime, Owner},
+    runtime::{post_message, remove_component_children, with_runtime, Owner},
 };
 use regex::Regex;
 use tracing::{span, Subscriber};
@@ -49,7 +49,8 @@ where
                 let Some(comp) = components.get(id) else {
                     return;
                 };
-                if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child" {
+                if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child"
+                {
                     true
                 } else {
                     false
@@ -60,12 +61,10 @@ where
                 let mut owner = runtime.owner.borrow_mut();
                 if owner.is_none() {
                     remove_component_children(id);
-                    leptos_devtools_extension_api::ComponentChildrenRemove {
+                    post_message(|| leptos_devtools_extension_api::ComponentChildrenRemove {
                         id: id.into_non_zero_u64(),
                         deep: true,
-                    }
-                    .post_message()
-                    .unwrap();
+                    });
 
                     let ancestors = runtime.ancestors.borrow_mut();
                     *owner = Some(Owner {
@@ -100,9 +99,7 @@ where
 
                 let mut owner = runtime.owner.borrow_mut();
                 if let Some(Owner { id, parent_id }) = owner.take() {
-                    extension::generate_extension_component(&id, parent_id)
-                        .post_message()
-                        .unwrap();
+                    post_message(|| extension::generate_extension_component(&id, parent_id));
                 }
                 return;
             }

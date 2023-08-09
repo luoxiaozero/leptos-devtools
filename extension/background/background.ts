@@ -1,6 +1,7 @@
 import {
     LEPTOS_DEVTOOLS_CONNENT,
     LEPTOS_DEVTOOLS_DEVTOOLS,
+    LEPTOS_DEVTOOLS_DEVTOOLS_HTML,
     LEPTOS_DEVTOOLS_MESSAGE,
 } from "../utils/constant"
 interface Message {
@@ -9,6 +10,7 @@ interface Message {
 }
 
 const devtoolsPortMap = new Map<number, chrome.runtime.Port>()
+const devtoolsHtmlPortMap = new Map<number, chrome.runtime.Port>()
 const contentPortMap = new Map<number, chrome.runtime.Port>()
 chrome.runtime.onConnect.addListener(port => {
     if (port.name === LEPTOS_DEVTOOLS_CONNENT) {
@@ -29,8 +31,32 @@ chrome.runtime.onConnect.addListener(port => {
                 return
             }
             const devtoolsPort = devtoolsPortMap.get(tabId)
+
             if (devtoolsPort) {
                 devtoolsPort.postMessage(message)
+            }
+        })
+    } else if (port.name === LEPTOS_DEVTOOLS_DEVTOOLS_HTML) {
+        port.onMessage.addListener((message, port) => {
+            if (
+                message.payload.length === 1 &&
+                typeof message.payload[0] === "object" &&
+                "TabId" in message.payload[0]
+            ) {
+                const tabId: number | null = message.payload[0]["TabId"]
+                if (!tabId) {
+                    return
+                }
+                devtoolsHtmlPortMap.set(tabId, port)
+                if (contentPortMap.has(tabId)) {
+                    port.postMessage({
+                        payload: [
+                            {
+                                ShowDevtools: true,
+                            },
+                        ],
+                    })
+                }
             }
         })
     } else if (port.name === LEPTOS_DEVTOOLS_DEVTOOLS) {
@@ -45,15 +71,6 @@ chrome.runtime.onConnect.addListener(port => {
                     return
                 }
                 devtoolsPortMap.set(tabId, port)
-                if (contentPortMap.has(tabId)) {
-                    port.postMessage({
-                        payload: [
-                            {
-                                ShowDevtools: true,
-                            },
-                        ],
-                    })
-                }
             }
         })
     }

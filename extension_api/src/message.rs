@@ -49,6 +49,10 @@ impl Message {
         let value = serde_wasm_bindgen::to_value(&self).unwrap();
         post_message(&value)
     }
+
+    pub fn into_js_value(self) -> JsValue {
+        serde_wasm_bindgen::to_value(&self).unwrap()
+    }
 }
 
 impl From<JsValue> for Message {

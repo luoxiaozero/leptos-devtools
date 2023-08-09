@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub enum Event {
     Component(Component),
     ComponentChildrenRemove(ComponentChildrenRemove),
+    TabId(u32),
 }
 
 impl Event {

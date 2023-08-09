@@ -1,5 +1,5 @@
-use crate::component::Component;
-use leptos_devtools_extension_api::{OnEvent, OnMessage};
+use crate::{component::Component, extension};
+use leptos_devtools_extension_api::{Message, OnEvent, OnMessage, PostMessage};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -21,7 +21,7 @@ pub(crate) struct Runtime {
     pub component_tree_set: RefCell<HashSet<span::Id>>,
 
     // extension
-    pub show_devtools: RefCell<bool>
+    pub show_devtools: RefCell<bool>,
 }
 
 pub(crate) fn with_runtime<T>(f: impl FnOnce(&Runtime) -> T) -> T {
@@ -64,12 +64,43 @@ pub fn on_message() {
         for event in payload {
             match event {
                 OnEvent::ShowDevtools(status) => {
-                    with_runtime(|runtime| {
+                    let roots = with_runtime(|runtime| {
                         *runtime.show_devtools.borrow_mut() = status;
+                        if status {
+                            Some(runtime.component_tree_root.borrow().clone())
+                        } else {
+                            None
+                        }
                     });
-                },
+
+                    let Some(roots) = roots else {
+                        return;
+                    };
+                    if roots.is_empty() {
+                        return;
+                    }
+
+                    let mut message = Message::new();
+                    for root in roots {
+                        message.add_event(
+                            extension::generate_extension_component(&root, None).into_event(),
+                        )
+                    }
+                    message.post_message().unwrap()
+                }
             }
         }
     })
     .unwrap();
+}
+
+pub fn post_message<T>(f: impl FnOnce() -> T)
+where
+    T: PostMessage,
+{
+    with_runtime(|runtime| {
+        if *runtime.show_devtools.borrow() {
+            f().post_message().unwrap()
+        }
+    });
 }

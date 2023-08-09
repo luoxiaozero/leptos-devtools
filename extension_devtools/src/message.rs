@@ -28,7 +28,8 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
                     merge_component(comp.clone());
                     component_update = true;
                 }
-                Event::ComponentChildrenRemove(_) => todo!(),
+                Event::ComponentChildrenRemove(_) => {}
+                Event::TabId(_) => {}
             }
         }
         if component_update {
@@ -37,4 +38,6 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
     })
     .into_js_value();
     port.on_message().add_listener(&on_message.unchecked_ref());
+    let event = Event::TabId(chrome().unwrap().devtools().inspected_window().tab_id());
+    port.post_message(event.into_message().into_js_value())
 }
