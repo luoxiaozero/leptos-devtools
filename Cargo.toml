@@ -2,6 +2,9 @@
 resolver = "2"
 members = ["devtools", "example", "extension_api", "extension_devtools"]
 
+[workspace.package]
+version = "0.0.0"
+
 [workspace.dependencies]
 leptos_devtools = { path = "./devtools", version = "0.0.0" }
 leptos_devtools_extension_api = { path = "./extension_api", version = "0.0.0" }
