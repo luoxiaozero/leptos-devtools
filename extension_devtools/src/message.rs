@@ -1,4 +1,4 @@
-use crate::component::{merge_component, remove_component_children};
+use crate::component::{merge_component, remove_all, remove_component_children};
 use chrome_wasm_bindgen::*;
 use leptos::*;
 use leptos_devtools_extension_api::{ComponentChildrenRemove, Event, Message};
@@ -30,10 +30,14 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
                 }
                 Event::ComponentChildrenRemove(ComponentChildrenRemove { id, deep }) => {
                     remove_component_children(&id, deep);
-                    component_update = true
+                    component_update = true;
                 }
                 Event::TabId(_) => {}
                 Event::OpenDevtoolsPanel => {}
+                Event::PageUnload => {
+                    remove_all();
+                    component_update = true;
+                }
             }
         }
         if component_update {

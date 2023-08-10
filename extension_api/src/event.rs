@@ -7,6 +7,7 @@ pub enum Event {
     ComponentChildrenRemove(ComponentChildrenRemove),
     TabId(u32),
     OpenDevtoolsPanel,
+    PageUnload,
 }
 
 impl Event {
@@ -20,4 +21,12 @@ impl Event {
 #[derive(Serialize, Deserialize)]
 pub enum OnEvent {
     DevtoolsPanelOpenStatus(bool),
+}
+
+#[test]
+fn serde() {
+    assert_eq!(
+        "{\"id\":\"LEPTOS_DEVTOOLS_MESSAGE\",\"payload\":[\"PageUnload\"]}",
+        serde_json::to_string(&Event::PageUnload.into_message()).unwrap()
+    )
 }

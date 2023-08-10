@@ -25,3 +25,10 @@ port.onMessage.addListener((message, _port) => {
         payload: message.payload,
     })
 })
+
+window.addEventListener("unload", () => {
+    port.postMessage({
+        id: LEPTOS_DEVTOOLS_MESSAGE,
+        payload: ["PageUnload"],
+    })
+})
