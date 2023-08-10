@@ -1,6 +1,6 @@
-import { LEPTOS_DEVTOOLS_DEVTOOLS_HTML } from "../utils/constant"
+import { LEPTOS_DEVTOOLS_DEVELOPER_TOOLS } from "../utils/constant"
 
-const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_DEVTOOLS_HTML })
+const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_DEVELOPER_TOOLS })
 
 port.postMessage({
     payload: [
@@ -13,12 +13,7 @@ port.postMessage({
 let panel: chrome.devtools.panels.ExtensionPanel | null = null
 
 port.onMessage.addListener(message => {
-    if (
-        message.payload.length === 1 &&
-        typeof message.payload[0] === "object" &&
-        "ShowDevtools" in message.payload[0] &&
-        message.payload[0]["ShowDevtools"]
-    ) {
+    if (message.payload.length === 1 && message.payload[0] === "OpenDevtoolsPanel") {
         if (panel) {
             return
         }

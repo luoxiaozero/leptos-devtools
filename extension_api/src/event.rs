@@ -6,6 +6,7 @@ pub enum Event {
     Component(Component),
     ComponentChildrenRemove(ComponentChildrenRemove),
     TabId(u32),
+    OpenDevtoolsPanel,
 }
 
 impl Event {
@@ -18,5 +19,5 @@ impl Event {
 
 #[derive(Serialize, Deserialize)]
 pub enum OnEvent {
-    ShowDevtools(bool),
+    DevtoolsPanelOpenStatus(bool),
 }

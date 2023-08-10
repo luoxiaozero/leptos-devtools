@@ -17,7 +17,7 @@ window.addEventListener("message", ev => {
 
 port.postMessage({
     id: LEPTOS_DEVTOOLS_MESSAGE,
-    payload: ["ShowDevtools"],
+    payload: ["DevtoolsPanelOpenStatus"],
 })
 port.onMessage.addListener((message, _port) => {
     window.postMessage({

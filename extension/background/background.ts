@@ -1,7 +1,7 @@
 import {
     LEPTOS_DEVTOOLS_CONNENT,
     LEPTOS_DEVTOOLS_DEVTOOLS,
-    LEPTOS_DEVTOOLS_DEVTOOLS_HTML,
+    LEPTOS_DEVTOOLS_DEVELOPER_TOOLS,
     LEPTOS_DEVTOOLS_MESSAGE,
 } from "../utils/constant"
 interface Message {
@@ -9,9 +9,11 @@ interface Message {
     payload: Array<any>
 }
 
-const devtoolsPortMap = new Map<number, chrome.runtime.Port>()
-const devtoolsHtmlPortMap = new Map<number, chrome.runtime.Port>()
+const devtoolsPanelPortMap = new Map<number, chrome.runtime.Port>()
+const isLepotsSet = new Set<number>()
+const developerToolsPortMap = new Map<number, chrome.runtime.Port>()
 const contentPortMap = new Map<number, chrome.runtime.Port>()
+
 chrome.runtime.onConnect.addListener(port => {
     if (port.name === LEPTOS_DEVTOOLS_CONNENT) {
         port.onMessage.addListener((message: Message, port) => {
@@ -19,21 +21,27 @@ chrome.runtime.onConnect.addListener(port => {
             if (!contentPortMap.has(tabId)) {
                 contentPortMap.set(tabId, port)
             }
-            if (message.payload.length === 1 && message.payload[0] === "ShowDevtools") {
+            if (message.payload.length === 1 && message.payload[0] === "DevtoolsPanelOpenStatus") {
                 port.postMessage({
                     id: LEPTOS_DEVTOOLS_MESSAGE,
                     payload: [
                         {
-                            ShowDevtools: devtoolsPortMap.has(tabId),
+                            DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
                         },
                     ],
                 })
                 return
             }
-            const devtoolsPort = devtoolsPortMap.get(tabId)
-
-            if (devtoolsPort) {
-                devtoolsPort.postMessage(message)
+            const devtoolsPanelPort = devtoolsPanelPortMap.get(tabId)
+            if (devtoolsPanelPort) {
+                devtoolsPanelPort.postMessage(message)
+            } else {
+                const developerToolsPort = developerToolsPortMap.get(tabId)
+                if (developerToolsPort) {
+                    developerToolsPort.postMessage({ payload: ["OpenDevtoolsPanel"] })
+                } else {
+                    isLepotsSet.add(tabId)
+                }
             }
         })
         port.onDisconnect.addListener(port => {
@@ -44,7 +52,7 @@ chrome.runtime.onConnect.addListener(port => {
                 }
             }
         })
-    } else if (port.name === LEPTOS_DEVTOOLS_DEVTOOLS_HTML) {
+    } else if (port.name === LEPTOS_DEVTOOLS_DEVELOPER_TOOLS) {
         port.onMessage.addListener((message, port) => {
             if (
                 message.payload.length === 1 &&
@@ -55,22 +63,18 @@ chrome.runtime.onConnect.addListener(port => {
                 if (!tabId) {
                     return
                 }
-                devtoolsHtmlPortMap.set(tabId, port)
-                if (contentPortMap.has(tabId)) {
+                developerToolsPortMap.set(tabId, port)
+                if (isLepotsSet.has(tabId)) {
                     port.postMessage({
-                        payload: [
-                            {
-                                ShowDevtools: true,
-                            },
-                        ],
+                        payload: ["OpenDevtoolsPanel"],
                     })
                 }
             }
         })
         port.onDisconnect.addListener(port => {
-            for (const [key, value] of devtoolsHtmlPortMap.entries()) {
+            for (const [key, value] of developerToolsPortMap.entries()) {
                 if (port === value) {
-                    devtoolsHtmlPortMap.delete(key)
+                    developerToolsPortMap.delete(key)
                     break
                 }
             }
@@ -86,24 +90,21 @@ chrome.runtime.onConnect.addListener(port => {
                 if (!tabId) {
                     return
                 }
-                devtoolsPortMap.set(tabId, port)
-                const contentPort = contentPortMap.get(tabId)
-                if (contentPort) {
-                    contentPort.postMessage({
-                        id: LEPTOS_DEVTOOLS_MESSAGE,
-                        payload: [
-                            {
-                                ShowDevtools: true,
-                            },
-                        ],
-                    })
-                }
+                devtoolsPanelPortMap.set(tabId, port)
+                contentPortMap.get(tabId)?.postMessage({
+                    id: LEPTOS_DEVTOOLS_MESSAGE,
+                    payload: [
+                        {
+                            DevtoolsPanelOpenStatus: true,
+                        },
+                    ],
+                })
             }
         })
         port.onDisconnect.addListener(port => {
-            for (const [key, value] of devtoolsPortMap.entries()) {
+            for (const [key, value] of devtoolsPanelPortMap.entries()) {
                 if (port === value) {
-                    devtoolsPortMap.delete(key)
+                    devtoolsPanelPortMap.delete(key)
                     break
                 }
             }

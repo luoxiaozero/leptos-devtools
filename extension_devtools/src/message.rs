@@ -33,6 +33,7 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
                     component_update = true
                 }
                 Event::TabId(_) => {}
+                Event::OpenDevtoolsPanel => {}
             }
         }
         if component_update {
