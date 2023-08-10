@@ -1,7 +1,9 @@
 [package]
 name = "leptos_devtools_extension_api"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
+authors = ["luoxiaozero"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

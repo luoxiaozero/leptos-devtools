@@ -11,13 +11,16 @@
     "keywords": [],
     "author": "",
     "license": "MIT",
-    "dependencies": {
-        "@types/chrome": "^0.0.243",
-        "typescript": "^5.1.6"
-    },
     "devDependencies": {
         "@crxjs/vite-plugin": "2.0.0-beta.18",
+        "@types/chrome": "^0.0.243",
+        "typescript": "^5.1.6",
         "vite": "^4.4.9",
         "vite-plugin-static-copy": "^0.17.0"
+    },
+    "packageManager": "pnpm@8.6.0",
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=8.6.0"
     }
 }
