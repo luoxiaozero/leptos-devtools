@@ -45,6 +45,16 @@ body {
     color: #2080f0;
 }
 
+.arrow {
+    display: inline-block;
+    width: 14px;
+    text-align: center;
+}
+
+.arrow:hover {
+    background-color: #ddd;
+}
+
 .arrow-right {
     display: inline-block;
     width: 0;
@@ -53,4 +63,9 @@ body {
     border-top: 4px solid transparent;
     border-bottom: 4px solid transparent;
     border-left: 6px solid #2c3e50;
+}
+
+.arrow-bottom {
+    transform: rotate(90deg);
+    transition: all 0.3s;
 }

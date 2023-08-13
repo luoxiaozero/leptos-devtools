@@ -1,24 +1,40 @@
-use std::num::NonZeroU64;
-use leptos::*;
 use crate::SelectedComponentId;
+use leptos::*;
+use std::{collections::HashSet, num::NonZeroU64};
 
 #[component]
 pub fn ComponentNode(id: NonZeroU64, name: String, level: u64) -> impl IntoView {
-    let selected_comp_id = use_context::<RwSignal<Option<SelectedComponentId>>>().expect("not found SelectedComponentId");
+    let selected_comp_id = use_context::<RwSignal<Option<SelectedComponentId>>>()
+        .expect("not found SelectedComponentId");
+    let expand_component =
+        use_context::<RwSignal<HashSet<NonZeroU64>>>().expect("not found expand_component");
+    expand_component.with_untracked(|ec| ec.contains(&id));
+
+    let arrow_click = move |_| {
+        expand_component.update(|ec| {
+            if ec.contains(&id) {
+                ec.remove(&id);
+            } else {
+                ec.insert(id);
+            }
+        });
+    };
     view! {
         <div class="node"
             class:node-selected=move || selected_comp_id.get() == Some(SelectedComponentId(id))
             on:click=move |_| selected_comp_id.set(Some(SelectedComponentId(id)))
         >
-            <Indent level>
-            </Indent>
+            <Indent level />
+            <span class="arrow" on:click=arrow_click>
+                <span class="arrow-right" class:arrow-bottom=move || expand_component.with(|ec| ec.contains(&id))>
+                </span>
+            </span>
             <span class="node-component__name">
                 "<"{ name }">"
             </span>
         </div>
     }
 }
-
 
 #[component]
 fn Indent(level: u64) -> impl IntoView {
@@ -36,19 +52,3 @@ fn Indent(level: u64) -> impl IntoView {
         </span>
     }
 }
-
-// #[component]
-// pub fn Arrow(cx: Scope, show: bool) -> impl IntoView {
-//     if show {
-//         view! {cx,
-//             <span class="inline-block w-4 h-4">
-//                 <span class="arrow-right"></span>
-//             </span>
-//         }
-//     } else {
-//         view! {cx,
-//             <span class="inline-block w-4 h-4">
-//             </span>
-//         }
-//     }
-// }

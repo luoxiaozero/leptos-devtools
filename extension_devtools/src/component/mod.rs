@@ -7,7 +7,14 @@ use std::num::NonZeroU64;
 use tree::with_component_store;
 pub use tree::{merge_component, remove_all, remove_component_children};
 
-pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<(NonZeroU64, View)> {
+#[derive(PartialEq, Clone)]
+pub struct Node {
+    pub id: NonZeroU64,
+    pub level: u64,
+    pub view: View,
+}
+
+pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<Node> {
     let mut views = vec![];
     let ids = with_component_store(|store| {
         if let Some(id) = id {
@@ -24,19 +31,20 @@ pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<(NonZeroU64
                 return None;
             };
 
-            views.push((
+            views.push(Node {
                 id,
-                view! {
+                level,
+                view: view! {
                     <ComponentNode id name=comp.name.clone() level/>
                 }
                 .into_view(),
-            ));
+            });
 
             store.tree.borrow().get(&comp.id).cloned()
         });
 
         if let Some(children) = children {
-            let children: Vec<(NonZeroU64, View)> = children
+            let children: Vec<Node> = children
                 .iter()
                 .map(|id| get_component_view(Some(id.clone()), level + 1))
                 .flatten()
