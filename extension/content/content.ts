@@ -3,6 +3,7 @@ import {
     LEPTOS_DEVTOOLS_MESSAGE,
     LEPTOS_DEVTOOLS_ON_MESSAGE,
 } from "../utils/constant"
+import type { Message } from "../types/message"
 
 const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_CONNENT })
 window.addEventListener("message", ev => {
@@ -18,7 +19,7 @@ window.addEventListener("message", ev => {
 port.postMessage({
     id: LEPTOS_DEVTOOLS_MESSAGE,
     payload: ["DevtoolsPanelOpenStatus"],
-})
+} as Message)
 port.onMessage.addListener((message, _port) => {
     window.postMessage({
         id: LEPTOS_DEVTOOLS_ON_MESSAGE,

@@ -3,11 +3,9 @@ import {
     LEPTOS_DEVTOOLS_DEVTOOLS,
     LEPTOS_DEVTOOLS_DEVELOPER_TOOLS,
     LEPTOS_DEVTOOLS_MESSAGE,
+    LEPTOS_DEVTOOLS_ON_MESSAGE
 } from "../utils/constant"
-interface Message {
-    id: typeof LEPTOS_DEVTOOLS_MESSAGE
-    payload: Array<any>
-}
+import type { Message } from "../types/message"
 
 const devtoolsPanelPortMap = new Map<number, chrome.runtime.Port>()
 const isLepotsSet = new Set<number>()
@@ -23,13 +21,13 @@ chrome.runtime.onConnect.addListener(port => {
             }
             if (message.payload.length === 1 && message.payload[0] === "DevtoolsPanelOpenStatus") {
                 port.postMessage({
-                    id: LEPTOS_DEVTOOLS_MESSAGE,
+                    id: LEPTOS_DEVTOOLS_ON_MESSAGE,
                     payload: [
                         {
                             DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
                         },
                     ],
-                })
+                } as Message)
                 return
             }
             const devtoolsPanelPort = devtoolsPanelPortMap.get(tabId)
