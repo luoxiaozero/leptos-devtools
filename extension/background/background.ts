@@ -2,10 +2,9 @@ import {
     LEPTOS_DEVTOOLS_CONNENT,
     LEPTOS_DEVTOOLS_DEVTOOLS,
     LEPTOS_DEVTOOLS_DEVELOPER_TOOLS,
-    LEPTOS_DEVTOOLS_MESSAGE,
-    LEPTOS_DEVTOOLS_ON_MESSAGE
 } from "../utils/constant"
 import type { Message } from "../types/message"
+import { createMessage, createOnMessage } from "../utils/message"
 
 const devtoolsPanelPortMap = new Map<number, chrome.runtime.Port>()
 const isLepotsSet = new Set<number>()
@@ -20,14 +19,11 @@ chrome.runtime.onConnect.addListener(port => {
                 contentPortMap.set(tabId, port)
             }
             if (message.payload.length === 1 && message.payload[0] === "DevtoolsPanelOpenStatus") {
-                port.postMessage({
-                    id: LEPTOS_DEVTOOLS_ON_MESSAGE,
-                    payload: [
-                        {
-                            DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
-                        },
-                    ],
-                } as Message)
+                port.postMessage(
+                    createOnMessage({
+                        DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
+                    })
+                )
                 return
             }
             const devtoolsPanelPort = devtoolsPanelPortMap.get(tabId)
@@ -36,7 +32,7 @@ chrome.runtime.onConnect.addListener(port => {
             } else {
                 const developerToolsPort = developerToolsPortMap.get(tabId)
                 if (developerToolsPort) {
-                    developerToolsPort.postMessage({ payload: ["OpenDevtoolsPanel"] })
+                    developerToolsPort.postMessage(createMessage("OpenDevtoolsPanel"))
                 } else {
                     isLepotsSet.add(tabId)
                 }
@@ -63,9 +59,7 @@ chrome.runtime.onConnect.addListener(port => {
                 }
                 developerToolsPortMap.set(tabId, port)
                 if (isLepotsSet.has(tabId)) {
-                    port.postMessage({
-                        payload: ["OpenDevtoolsPanel"],
-                    })
+                    port.postMessage(createMessage("OpenDevtoolsPanel"))
                 }
             }
         })
@@ -89,14 +83,11 @@ chrome.runtime.onConnect.addListener(port => {
                     return
                 }
                 devtoolsPanelPortMap.set(tabId, port)
-                contentPortMap.get(tabId)?.postMessage({
-                    id: LEPTOS_DEVTOOLS_MESSAGE,
-                    payload: [
-                        {
-                            DevtoolsPanelOpenStatus: true,
-                        },
-                    ],
-                })
+                contentPortMap.get(tabId)?.postMessage(
+                    createOnMessage({
+                        DevtoolsPanelOpenStatus: true,
+                    })
+                )
             }
         })
         port.onDisconnect.addListener(port => {
