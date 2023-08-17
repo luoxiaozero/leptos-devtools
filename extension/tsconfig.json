@@ -21,5 +21,12 @@
 
         "types": ["@types/chrome"]
     },
-    "include": ["background/**/*", "content/**/*", "devtools/**/*", "utils/**/*", "manifest.ts"]
+    "include": [
+        "background/**/*",
+        "content/**/*",
+        "devtools/**/*",
+        "popup/**/*",
+        "utils/**/*",
+        "manifest.ts"
+    ]
 }

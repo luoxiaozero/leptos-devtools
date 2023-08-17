@@ -55,3 +55,7 @@ Then add `lepton_devtools::devtools()` before `mount_to_body` function in `main`
 The current library is very unstable.
 
 When there is a problem, refresh the page or reopen Developer Tools.
+
+## Resources
+
+[Solid Devtools](https://github.com/thetarnav/solid-devtools)

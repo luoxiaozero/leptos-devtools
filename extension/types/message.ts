@@ -5,10 +5,16 @@ export interface Message {
     payload: Array<Event | OnEvent>
 }
 
-export type Event = "DevtoolsPanelOpenStatus" | "OpenDevtoolsPanel" | "PageUnload"
+export type Event = "DevtoolsPanelOpenStatus" | "OpenDevtoolsPanel" | "PageUnload" | "Detected"
 
 interface DevtoolsPanelOpenStatus {
     DevtoolsPanelOpenStatus: boolean
 }
 
-export type OnEvent = DevtoolsPanelOpenStatus
+interface Detected {
+    Detected: {
+        Lepots: boolean
+    }
+}
+
+export type OnEvent = DevtoolsPanelOpenStatus | Detected

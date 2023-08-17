@@ -1,5 +1,6 @@
 import { defineManifest } from "@crxjs/vite-plugin"
 import { version } from "./package.json"
+import icons from "./utils/icon"
 
 export default defineManifest({
     manifest_version: 3,
@@ -20,7 +21,10 @@ export default defineManifest({
     content_security_policy: {
         extension_pages: "script-src 'self' 'wasm-unsafe-eval'; default-src 'self';",
     },
-    icons: {
-        "48": "assets/icons/leptos-logo-48.png",
+    action: {
+        default_icon: icons.gray,
+        default_title: "Leptos Devtools",
+        default_popup: "popup/popup.html",
     },
+    icons: icons.normal,
 })
