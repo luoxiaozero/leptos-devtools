@@ -1,5 +1,6 @@
 use crate::{component::get_component_props, SelectedComponentId};
 use leptos::*;
+use serde_json::Value;
 
 #[component]
 pub fn Aside() -> impl IntoView {
@@ -13,36 +14,108 @@ pub fn Aside() -> impl IntoView {
         }
     });
     view! {
-        <aside class="w-360px p-8">
-            <div>
+        <aside class="w-320px p-8px font-size-14px">
+            <div class="my-6px">
                 "Props"
             </div>
-            <For
-                each=move || props.get()
-                key=|prop| prop.name.clone()
-                view=|prop| {
+            {
+                move || props.get().into_iter().map(|prop| {
                     view! {
-                        <div>
-                            <span>{ prop.name }</span>
+                        <div class="ml-20px my-6px">
+                            <span>{ prop.name }" : "</span>
                             {
                                 if let Some(err) = prop.error {
-                                    Some(view! {
-                                        ":"
-                                        <span title=err>"Error"</span>
-                                    })
+                                    view! {
+                                        <>
+                                            <span title=err class="prop-value-tag prop-value-tag--error">"Error"</span>
+                                        </>
+                                    }.into()
                                 } else if let Some(value) = prop.value {
-                                    Some(view! {
-                                        ":"
-                                        <span>{ value.to_string() }</span>
-                                    })
+                                    view! {
+                                        <>
+                                            <Value value/>
+                                        </>
+                                    }.into()
                                 } else {
                                     None
                                 }
                             }
                         </div>
                     }
-                }
-            />
+                }).collect::<Vec<_>>()
+            }
         </aside>
+    }
+}
+
+#[component]
+fn Value(value: Value) -> impl IntoView {
+    match value {
+        Value::Null => {
+            view! {
+                <>
+                    <span>"null"</span>
+                </>
+            }
+        }
+        Value::Bool(value) => {
+            view! {
+                <>
+                    <span>{ value }</span>
+                </>
+            }
+        }
+        Value::Number(value) => {
+            view! {
+                <>
+                    <span>{ value.to_string() }</span>
+                </>
+            }
+        }
+        Value::String(value) => {
+            view! {
+                <>
+                    <span>{ format!(r#""{value}""#) }</span>
+                </>
+            }
+        }
+        Value::Array(arr) => {
+            view! {
+                <>
+                    <div class="ml-20px">
+                        {
+                            arr.into_iter().enumerate().map(|(index, value)| {
+                                view! {
+                                    <div class="my-6px">
+                                        <span>{ index }</span>
+                                        " : "
+                                        <Value value/>
+                                    </div>
+                                }
+                            }).collect::<Vec<_>>()
+                        }
+                    </div>
+                <>
+            }
+        }
+        Value::Object(obj) => {
+            view! {
+                <>
+                    <div class="ml-20px">
+                        {
+                            obj.into_iter().map(|(key, value)| {
+                                view! {
+                                    <div class="my-6px">
+                                        <span>{ format!(r#""{key}""#) }</span>
+                                        " : "
+                                        <Value value/>
+                                    </div>
+                                }
+                            }).collect::<Vec<_>>()
+                        }
+                    </div>
+                <>
+            }
+        }
     }
 }

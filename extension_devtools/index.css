@@ -14,16 +14,29 @@
     width: 16px;
 }
 
-.w-360px {
-    width: 300px;
+.w-320px {
+    width: 320px;
 }
 
 .h-screen {
     height: 100vh;
 }
 
+.my-6px {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.ml-20px {
+    margin-left: 20px;
+}
+
 .p-8px {
     padding: 8px;
+}
+
+.font-size-14px {
+    font-size: 14px;
 }
 
 body {
@@ -72,4 +85,21 @@ body {
 .arrow-bottom {
     transform: rotate(90deg);
     transition: all 0.3s;
+}
+
+aside {
+    border-left: 1px solid #ddd;
+}
+
+.prop-value-tag {
+    padding: 0px 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.prop-value-tag--error {
+    background-color: red;
+    color: white;
+    border-color: transparent;
 }
