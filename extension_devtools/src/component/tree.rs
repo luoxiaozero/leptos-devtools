@@ -1,13 +1,22 @@
 use leptos_devtools_extension_api::Component;
+use serde::Deserialize;
 use std::{cell::RefCell, collections::HashMap, num::NonZeroU64};
 
 thread_local! {
     pub(crate) static COMPONENT_STORE: ComponentStore = Default::default();
 }
 
+#[derive(Default, Clone, Deserialize, PartialEq)]
+pub(crate) struct Prop {
+    pub name: String,
+    pub value: Option<serde_json::Value>,
+    pub error: Option<String>,
+}
+
 #[derive(Default)]
 pub(crate) struct ComponentStore {
     pub components: RefCell<HashMap<NonZeroU64, Component>>,
+    pub props: RefCell<HashMap<NonZeroU64, Vec<Prop>>>,
     pub tree_root: RefCell<Vec<NonZeroU64>>,
     pub tree: RefCell<HashMap<NonZeroU64, Vec<NonZeroU64>>>,
 }
@@ -32,6 +41,12 @@ pub fn merge_component(mut comp: Component) {
         let children: Vec<Component> = comp.children.drain(0..comp.children.len()).collect();
         for child in children {
             merge_component(child);
+        }
+
+        if let Some(props) = comp.props.take() {
+            if let Ok(props) = serde_json::from_str::<Vec<Prop>>(&props) {
+                store.props.borrow_mut().insert(comp.id, props);
+            }
         }
 
         store.components.borrow_mut().insert(comp.id, comp);
@@ -63,4 +78,14 @@ pub fn remove_all() {
         store.tree_root.borrow_mut().clear();
         store.tree.borrow_mut().clear();
     });
+}
+
+pub(crate) fn get_component_props(comp_id: &NonZeroU64) -> Vec<Prop> {
+    with_component_store(|store| {
+        store
+            .props
+            .borrow()
+            .get(comp_id)
+            .map_or(vec![], |p| p.to_vec())
+    })
 }

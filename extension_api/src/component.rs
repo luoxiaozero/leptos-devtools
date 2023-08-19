@@ -12,6 +12,7 @@ pub struct Component {
     pub parent_id: Option<NonZeroU64>,
     pub id: NonZeroU64,
     pub name: String,
+    pub props: Option<String>,
     pub children: Vec<Component>,
 }
 

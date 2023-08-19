@@ -5,7 +5,9 @@ use component_node::ComponentNode;
 use leptos::*;
 use std::num::NonZeroU64;
 use tree::with_component_store;
-pub use tree::{merge_component, remove_all, remove_component_children};
+pub(crate) use tree::{
+    get_component_props, merge_component, remove_all, remove_component_children,
+};
 
 #[derive(PartialEq, Clone)]
 pub struct Node {

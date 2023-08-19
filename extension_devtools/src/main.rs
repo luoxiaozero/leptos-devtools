@@ -1,7 +1,9 @@
 mod component;
+mod components;
 mod message;
 
 use crate::{component::get_component_view, message::on_message};
+use components::Aside;
 use leptos::*;
 use std::{collections::HashSet, num::NonZeroU64};
 
@@ -59,6 +61,15 @@ fn App() -> impl IntoView {
                     }
                 />
             </main>
+            {
+                move || if selected_component_id.get().is_some() {
+                    view! {
+                        <Aside />
+                    }.into()
+                } else {
+                    None
+                }
+            }
         </section>
     }
 }

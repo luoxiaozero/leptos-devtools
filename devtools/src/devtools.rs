@@ -4,7 +4,11 @@ use crate::{
     runtime::{post_message, remove_component_children, with_runtime, Owner},
 };
 use regex::Regex;
-use tracing::{span, Subscriber};
+use std::fmt::Debug;
+use tracing::{
+    field::{Field, Visit},
+    span, Subscriber,
+};
 use tracing_subscriber::{layer::Context, registry::LookupSpan, Layer};
 
 #[derive(Default)]
@@ -17,6 +21,21 @@ where
 {
     fn on_new_span(&self, attrs: &span::Attributes<'_>, id: &span::Id, _ctx: Context<'_, S>) {
         let metadata = attrs.metadata();
+
+        if metadata.name() == "leptos_dom::tracing_props" {
+            let mut visitor = PropsVisitor(None);
+            attrs.record(&mut visitor);
+
+            with_runtime(|runtime| {
+                if let Some(comp_id) = runtime.ancestors.borrow().last() {
+                    if let Some(comp) = runtime.components.borrow_mut().get_mut(comp_id) {
+                        comp.set_props(visitor.0);
+                    }
+                }
+            });
+            return;
+        }
+
         if metadata.target() == "leptos_dom::components" && metadata.name() == "<Component />" {
             return;
         }
@@ -123,7 +142,6 @@ where
                         post_message(|| extension::generate_extension_component(&id, parent_id));
                     }
                 }
-                
             }
             if !component_tree_set.contains(id) {
                 let parent_id = ancestors.last().expect("ancestors is empty");
@@ -136,5 +154,15 @@ where
                 component_tree_set.insert(id.clone());
             }
         });
+    }
+}
+
+struct PropsVisitor(Option<String>);
+impl Visit for PropsVisitor {
+    fn record_debug(&mut self, _field: &Field, _value: &dyn Debug) {}
+    fn record_str(&mut self, field: &Field, value: &str) {
+        if field.name() == "props" {
+            self.0 = Some(value.to_string());
+        }
     }
 }

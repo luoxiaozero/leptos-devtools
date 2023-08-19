@@ -14,6 +14,7 @@ pub(crate) fn generate_extension_component(
             parent_id: parent_id.map(|v| v.into_non_zero_u64()),
             id: id.into_non_zero_u64(),
             name: comp.name().clone(),
+            props: comp.props().clone(),
             children: vec![],
         }
     });

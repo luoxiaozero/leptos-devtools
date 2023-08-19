@@ -20,3 +20,4 @@ extension_devtools/dist
 /extension/dist
 node_modules
 pnpm-lock.yaml
+package-lock.json

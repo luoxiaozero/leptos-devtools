@@ -7,13 +7,13 @@ fn main() {
 }
 
 #[component]
-fn App() -> impl IntoView {
-    let (read, set_read) = create_signal(false);
-    view! {
+fn App(cx: Scope) -> impl IntoView {
+    let (read, set_read) = create_signal(cx, false);
+    view! {cx,
         {
             move || {
                 if read.get() {
-                    view! {
+                    view! {cx,
                         <ShowRead read />
                     }.into()
                 } else {
@@ -26,8 +26,8 @@ fn App() -> impl IntoView {
 }
 
 #[component]
-fn ShowRead(read: ReadSignal<bool>) -> impl IntoView {
-    view! {
+fn ShowRead(cx: Scope, read: ReadSignal<bool>) -> impl IntoView {
+    view! {cx,
         <span>{move || read.get() }</span>
     }
 }
