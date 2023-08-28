@@ -23,13 +23,25 @@ chrome.runtime.onConnect.addListener(port => {
             if (!contentPortMap.has(tabId)) {
                 contentPortMap.set(tabId, port)
             }
-            if (message.payload.length === 1 && message.payload[0] === "DevtoolsPanelOpenStatus") {
-                port.postMessage(
-                    createOnMessage({
-                        DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
-                    })
-                )
-                return
+            
+            if (message.payload.length === 1) {
+                if (message.payload[0] === "DevtoolsPanelOpenStatus") {
+                    port.postMessage(
+                        createOnMessage({
+                            DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
+                        })
+                    )
+                    return
+                } else if (message.payload[0] === "OpenDevtoolsPanel") {
+                    popupPortMap.get(tabId)?.postMessage(createOnMessage({ Detected: { Lepots: true } }))
+                    chrome.action.setIcon({ tabId, path: icons.normal })
+                    if (!isLepotsSet.has(tabId)) {
+                        isLepotsSet.add(tabId)
+                    }
+                } else if (message.payload[0] === "PageUnload") {
+                    isLepotsSet.delete(tabId)
+                    popupPortMap.get(tabId)?.postMessage(createOnMessage({ Detected: { Lepots: false } }))
+                }
             }
             const devtoolsPanelPort = devtoolsPanelPortMap.get(tabId)
             if (devtoolsPanelPort) {
@@ -38,12 +50,6 @@ chrome.runtime.onConnect.addListener(port => {
                 const developerToolsPort = developerToolsPortMap.get(tabId)
                 if (developerToolsPort) {
                     developerToolsPort.postMessage(createMessage("OpenDevtoolsPanel"))
-                } else {
-                    chrome.action.setIcon({ tabId, path: icons.normal })
-                    isLepotsSet.add(tabId)
-                    popupPortMap
-                        .get(tabId)
-                        ?.postMessage(createOnMessage({ Detected: { Lepots: true } }))
                 }
             }
         })
@@ -111,6 +117,9 @@ chrome.runtime.onConnect.addListener(port => {
         popupPortMap.set(activeTabId, port)
         port.onMessage.addListener((message: Message, port) => {
             if (message.payload.length === 1 && message.payload[0] === "Detected") {
+                if (activeTabId !== -1 && isLepotsSet.has(activeTabId)) {
+                    chrome.action.setIcon({ tabId: activeTabId, path: icons.normal })
+                }
                 port.postMessage(
                     createOnMessage({ Detected: { Lepots: isLepotsSet.has(activeTabId) } })
                 )
