@@ -1,7 +1,7 @@
-mod devtools;
-mod runtime;
-mod extension;
 mod component;
+mod devtools;
+mod extension;
+mod runtime;
 
 use devtools::Devtools;
 use runtime::on_message;
@@ -10,7 +10,7 @@ use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::Subs
 pub fn devtools() {
     on_message();
     tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
+        .with_max_level(tracing::Level::TRACE)
         .without_time()
         .with_file(true)
         .with_line_number(true)

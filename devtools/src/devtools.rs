@@ -39,6 +39,9 @@ where
         if metadata.target() == "leptos_dom::components" && metadata.name() == "<Component />" {
             return;
         }
+        if metadata.target() == "leptos_dom::html" && metadata.name() == "<HtmlElement />" {
+            return;
+        }
 
         let re = Regex::new(r"^<(.*?) />$").unwrap();
         if let Some(name) = re

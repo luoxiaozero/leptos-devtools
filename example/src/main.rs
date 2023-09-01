@@ -7,27 +7,27 @@ fn main() {
 }
 
 #[component]
-fn App(cx: Scope) -> impl IntoView {
-    let (read, set_read) = create_signal(cx, false);
-    view! {cx,
+fn App() -> impl IntoView {
+    let (read, set_read) = create_signal(false);
+    view! {
         {
             move || {
                 if read.get() {
-                    view! {cx,
-                        <ShowRead read />
+                    view! {
+                        <ShowRead read count=3/>
                     }.into()
                 } else {
                     None
                 }
             }
         }
-        <ShowRead on:click=move |_| set_read.set(!read.get()) read/>
+        <ShowRead on:click=move |_| set_read.set(!read.get()) read count=2/>
     }
 }
 
 #[component]
-fn ShowRead(cx: Scope, read: ReadSignal<bool>) -> impl IntoView {
-    view! {cx,
-        <span>{move || read.get() }</span>
+fn ShowRead(read: ReadSignal<bool>, count: u32) -> impl IntoView {
+    view! {
+        <span>{move || read.get() } { count }</span>
     }
 }
