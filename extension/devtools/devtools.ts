@@ -1,8 +1,9 @@
-import { LEPTOS_DEVTOOLS_DEVELOPER_TOOLS } from "../utils/constant"
+import { createPortMessanger } from "../utils/bridge"
+import { ConnectionName } from "../utils/constant"
 
-const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_DEVELOPER_TOOLS })
-
-port.postMessage({
+const port = chrome.runtime.connect({ name: ConnectionName.Developer })
+const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
+toBackground({
     payload: [
         {
             TabId: chrome.devtools.inspectedWindow.tabId,
@@ -12,7 +13,7 @@ port.postMessage({
 
 let panel: chrome.devtools.panels.ExtensionPanel | null = null
 
-port.onMessage.addListener(message => {
+fromBackground(message => {
     if (message.payload.length === 1 && message.payload[0] === "OpenDevtoolsPanel") {
         if (panel) {
             return

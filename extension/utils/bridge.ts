@@ -1,5 +1,5 @@
 export function createPortMessanger(port: chrome.runtime.Port) {
-    const listeners: Array<(message: any) => void> = []
+    const listeners: Array<(message: any, port: chrome.runtime.Port) => void> = []
 
     let connected = true
     port.onDisconnect.addListener(() => {
@@ -9,8 +9,8 @@ export function createPortMessanger(port: chrome.runtime.Port) {
         port.onMessage.removeListener(onMessage)
     })
 
-    function onMessage(message: any) {
-        listeners.forEach(fn => fn(message))
+    function onMessage(message: any, port: chrome.runtime.Port) {
+        listeners.forEach(fn => fn(message, port))
     }
     port.onMessage.addListener(onMessage)
 
@@ -19,7 +19,7 @@ export function createPortMessanger(port: chrome.runtime.Port) {
             if (!connected) return
             port.postMessage(message)
         },
-        onPortMessage: (handler: (message: any) => void) => {
+        onPortMessage: (handler: (message: any, port: chrome.runtime.Port) => void) => {
             if (!connected) return
 
             listeners.push(handler)
