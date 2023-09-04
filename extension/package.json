@@ -6,7 +6,8 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "build": "cd ../extension_devtools && trunk build --release && cd ../extension && tsc && vite build"
+        "dev": "cd ../extension_devtools && trunk build --features development && unocss \"src/**/*.rs\" -o ./dist/uno.css && cd ../extension && tsc && vite build --mode development",
+        "build": "cd ../extension_devtools && trunk build --release && unocss \"src/**/*.rs\" -o ./dist/uno.css && cd ../extension && tsc && vite build"
     },
     "keywords": [],
     "author": "",
@@ -15,6 +16,7 @@
         "@crxjs/vite-plugin": "2.0.0-beta.18",
         "@types/chrome": "^0.0.243",
         "typescript": "^5.1.6",
+        "unocss": "^0.55.6",
         "vite": "^4.4.9",
         "vite-plugin-static-copy": "^0.17.0"
     },

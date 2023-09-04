@@ -19,9 +19,10 @@ pub fn ComponentNode(id: NonZeroU64, name: String, level: u64) -> impl IntoView 
             }
         });
     };
+    let selected = create_memo(move |_| selected_comp_id.get() == Some(SelectedComponentId(id)));
     view! {
         <div class="node"
-            class:node-selected=move || selected_comp_id.get() == Some(SelectedComponentId(id))
+            class:node-selected=move || selected.get()
             on:click=move |_| selected_comp_id.set(Some(SelectedComponentId(id)))
         >
             <Indent level />
@@ -32,6 +33,14 @@ pub fn ComponentNode(id: NonZeroU64, name: String, level: u64) -> impl IntoView 
             <span class="node-component__name">
                 "<"{ name }">"
             </span>
+            {
+                #[cfg(feature = "development")]
+                view! {
+                    <span class="pl-12px color-#aaa">
+                        "id="{ id }
+                    </span>
+                }
+            }
         </div>
     }
 }
