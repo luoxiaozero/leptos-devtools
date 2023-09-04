@@ -1,8 +1,7 @@
 import {
-    LEPTOS_DEVTOOLS_CONNENT,
     LEPTOS_DEVTOOLS_DEVTOOLS,
     LEPTOS_DEVTOOLS_DEVELOPER_TOOLS,
-    LEPTOS_DEVTOOLS_POPUP,
+    ConnectionName,
 } from "../utils/constant"
 import type { Message } from "../types/message"
 import { createMessage, createOnMessage } from "../utils/message"
@@ -17,13 +16,13 @@ let activeTabId: number = -1
 chrome.tabs.onActivated.addListener(({ tabId }) => (activeTabId = tabId))
 
 chrome.runtime.onConnect.addListener(port => {
-    if (port.name === LEPTOS_DEVTOOLS_CONNENT) {
+    if (port.name === ConnectionName.Content) {
         port.onMessage.addListener((message: Message, port) => {
             const tabId = port.sender!.tab!.id!
             if (!contentPortMap.has(tabId)) {
                 contentPortMap.set(tabId, port)
             }
-            
+
             if (message.payload.length === 1) {
                 if (message.payload[0] === "DevtoolsPanelOpenStatus") {
                     port.postMessage(
@@ -33,14 +32,18 @@ chrome.runtime.onConnect.addListener(port => {
                     )
                     return
                 } else if (message.payload[0] === "OpenDevtoolsPanel") {
-                    popupPortMap.get(tabId)?.postMessage(createOnMessage({ Detected: { Lepots: true } }))
+                    popupPortMap
+                        .get(tabId)
+                        ?.postMessage(createOnMessage({ Detected: { Lepots: true } }))
                     chrome.action.setIcon({ tabId, path: icons.normal })
                     if (!isLepotsSet.has(tabId)) {
                         isLepotsSet.add(tabId)
                     }
                 } else if (message.payload[0] === "PageUnload") {
                     isLepotsSet.delete(tabId)
-                    popupPortMap.get(tabId)?.postMessage(createOnMessage({ Detected: { Lepots: false } }))
+                    popupPortMap
+                        .get(tabId)
+                        ?.postMessage(createOnMessage({ Detected: { Lepots: false } }))
                 }
             }
             const devtoolsPanelPort = devtoolsPanelPortMap.get(tabId)
@@ -113,7 +116,7 @@ chrome.runtime.onConnect.addListener(port => {
                 }
             }
         })
-    } else if (port.name === LEPTOS_DEVTOOLS_POPUP) {
+    } else if (port.name === ConnectionName.Popup) {
         popupPortMap.set(activeTabId, port)
         port.onMessage.addListener((message: Message, port) => {
             if (message.payload.length === 1 && message.payload[0] === "Detected") {

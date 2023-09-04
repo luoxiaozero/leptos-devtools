@@ -1,9 +1,12 @@
-import { LEPTOS_DEVTOOLS_CONNENT, LEPTOS_DEVTOOLS_MESSAGE } from "../utils/constant"
+import { createPortMessanger } from "../utils/bridge"
+import { LEPTOS_DEVTOOLS_MESSAGE, ConnectionName } from "../utils/constant"
 import { createMessage, createOnMessage } from "../utils/message"
 
-const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_CONNENT })
-port.postMessage(createMessage("DevtoolsPanelOpenStatus"))
-port.onMessage.addListener((message, _port) => {
+const port = chrome.runtime.connect({ name: ConnectionName.Content })
+const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
+
+toBackground(createMessage("DevtoolsPanelOpenStatus"))
+fromBackground(message => {
     window.postMessage(createOnMessage(message.payload))
 })
 
@@ -13,9 +16,9 @@ window.addEventListener("message", ev => {
     }
 
     if (ev.data.id && ev.data.id === LEPTOS_DEVTOOLS_MESSAGE) {
-        port.postMessage(ev.data)
+        toBackground(ev.data)
     }
 })
 window.addEventListener("unload", () => {
-    port.postMessage(createMessage("PageUnload"))
+    toBackground(createMessage("PageUnload"))
 })

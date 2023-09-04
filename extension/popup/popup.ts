@@ -1,12 +1,15 @@
 import { Message } from "../types/message"
-import { LEPTOS_DEVTOOLS_POPUP } from "../utils/constant"
+import { createPortMessanger } from "../utils/bridge"
+import { ConnectionName } from "../utils/constant"
 import { createMessage } from "../utils/message"
 
 window.onload = () => {
     setLeptos(false)
-    const port = chrome.runtime.connect({ name: LEPTOS_DEVTOOLS_POPUP })
-    port.postMessage(createMessage("Detected"))
-    port.onMessage.addListener((message: Message, _port) => {
+    const port = chrome.runtime.connect({ name: ConnectionName.Popup })
+    const { postPortMessage: toBackground, onPortMessage: fromBackground } =
+        createPortMessanger(port)
+    toBackground(createMessage("Detected"))
+    fromBackground((message: Message) => {
         if (
             message.payload.length === 1 &&
             typeof message.payload[0] === "object" &&
