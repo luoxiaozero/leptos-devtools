@@ -21,8 +21,9 @@ pub fn Aside() -> impl IntoView {
             {
                 move || props.get().into_iter().map(|prop| {
                     view! {
-                        <div class="ml-20px my-6px">
-                            <span>{ prop.name }" : "</span>
+                        <div class="ml-20px my-4px">
+                            <span class="color-#8128e8">{ prop.name }</span>
+                            ": "
                             {
                                 if let Some(err) = prop.error {
                                     view! {
@@ -61,14 +62,14 @@ fn Value(value: Value) -> impl IntoView {
         Value::Bool(value) => {
             view! {
                 <>
-                    <span>{ value }</span>
+                    <span class="color-#03c">{ value }</span>
                 </>
             }
         }
         Value::Number(value) => {
             view! {
                 <>
-                    <span>{ value.to_string() }</span>
+                    <span class="color-#03c">{ value.to_string() }</span>
                 </>
             }
         }
@@ -86,9 +87,9 @@ fn Value(value: Value) -> impl IntoView {
                         {
                             arr.into_iter().enumerate().map(|(index, value)| {
                                 view! {
-                                    <div class="my-6px">
-                                        <span>{ index }</span>
-                                        " : "
+                                    <div class="my-4px">
+                                        <span class="color-#8128e8">{ index }</span>
+                                        ": "
                                         <Value value/>
                                     </div>
                                 }
@@ -105,9 +106,9 @@ fn Value(value: Value) -> impl IntoView {
                         {
                             obj.into_iter().map(|(key, value)| {
                                 view! {
-                                    <div class="my-6px">
-                                        <span>{ format!(r#""{key}""#) }</span>
-                                        " : "
+                                    <div class="my-4px">
+                                        <span class="color-#8128e8">{ format!(r#""{key}""#) }</span>
+                                        ": "
                                         <Value value/>
                                     </div>
                                 }

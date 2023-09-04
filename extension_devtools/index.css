@@ -22,6 +22,11 @@
     height: 100vh;
 }
 
+.my-4px {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
 .my-6px {
     margin-top: 6px;
     margin-bottom: 6px;
@@ -37,6 +42,14 @@
 
 .font-size-14px {
     font-size: 14px;
+}
+
+.color-\#8128e8 {
+    color: #8128e8;
+}
+
+.color-\#03c {
+    color: #03c;
 }
 
 body {
