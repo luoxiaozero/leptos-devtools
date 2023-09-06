@@ -1,4 +1,4 @@
-use crate::component::{merge_component, remove_all, remove_component_children};
+use crate::utils::{merge_component, remove_all, remove_component_children};
 use chrome_wasm_bindgen::*;
 use leptos::*;
 use leptos_devtools_extension_api::{ComponentChildrenRemove, Event, Message};

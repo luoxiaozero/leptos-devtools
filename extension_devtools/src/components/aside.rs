@@ -1,4 +1,4 @@
-use crate::{component::get_component_props, SelectedComponentId};
+use crate::{utils::get_component_props, SelectedComponentId};
 use leptos::*;
 use serde_json::Value;
 

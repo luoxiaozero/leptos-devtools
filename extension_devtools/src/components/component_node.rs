@@ -4,10 +4,8 @@ use std::{collections::HashSet, num::NonZeroU64};
 
 #[component]
 pub fn ComponentNode(id: NonZeroU64, name: String, level: u64) -> impl IntoView {
-    let selected_comp_id = use_context::<RwSignal<Option<SelectedComponentId>>>()
-        .expect("not found SelectedComponentId");
-    let expand_component =
-        use_context::<RwSignal<HashSet<NonZeroU64>>>().expect("not found expand_component");
+    let selected_comp_id = expect_context::<RwSignal<Option<SelectedComponentId>>>();
+    let expand_component = expect_context::<RwSignal<HashSet<NonZeroU64>>>();
     expand_component.with_untracked(|ec| ec.contains(&id));
 
     let arrow_click = move |_| {
@@ -19,7 +17,7 @@ pub fn ComponentNode(id: NonZeroU64, name: String, level: u64) -> impl IntoView 
             }
         });
     };
-    let selected = create_memo(move |_| selected_comp_id.get() == Some(SelectedComponentId(id)));
+    let selected = create_memo(move |_| selected_comp_id.get().map_or(false, |v| v.0 == id));
     view! {
         <div class="node"
             class:node-selected=move || selected.get()
