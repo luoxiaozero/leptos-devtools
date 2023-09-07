@@ -85,13 +85,13 @@ pub fn on_message() {
                         return;
                     }
 
-                    let mut message = Message::new();
-                    for root in roots {
-                        message.add_event(
-                            extension::generate_extension_component(&root, None).into_event(),
-                        )
-                    }
-                    message.post_message().unwrap()
+                    let payload = roots
+                        .into_iter()
+                        .map(|root| {
+                            extension::generate_extension_component(&root, None).into_event()
+                        })
+                        .collect();
+                    Message::new(payload).post_message().unwrap()
                 }
             }
         }

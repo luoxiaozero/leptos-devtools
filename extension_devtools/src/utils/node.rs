@@ -1,23 +1,15 @@
-mod component_node;
-mod tree;
-
-use component_node::ComponentNode;
-use leptos::*;
+use super::component::with_component_store;
 use std::num::NonZeroU64;
-use tree::with_component_store;
-pub(crate) use tree::{
-    get_component_props, merge_component, remove_all, remove_component_children,
-};
 
 #[derive(PartialEq, Clone)]
-pub struct Node {
+pub(crate) struct Node {
     pub id: NonZeroU64,
     pub level: u64,
-    pub view: View,
+    pub name: String,
 }
 
-pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<Node> {
-    let mut views = vec![];
+pub(crate) fn gen_nodes(id: Option<NonZeroU64>, level: u64) -> Vec<Node> {
+    let mut nodes = vec![];
     let ids = with_component_store(|store| {
         if let Some(id) = id {
             vec![id]
@@ -33,13 +25,10 @@ pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<Node> {
                 return None;
             };
 
-            views.push(Node {
+            nodes.push(Node {
                 id,
                 level,
-                view: view! {
-                    <ComponentNode id name=comp.name.clone() level/>
-                }
-                .into_view(),
+                name: comp.name.clone(),
             });
 
             store.tree.borrow().get(&comp.id).cloned()
@@ -48,11 +37,11 @@ pub fn get_component_view(id: Option<NonZeroU64>, level: u64) -> Vec<Node> {
         if let Some(children) = children {
             let children: Vec<Node> = children
                 .iter()
-                .map(|id| get_component_view(Some(id.clone()), level + 1))
+                .map(|id| gen_nodes(Some(id.clone()), level + 1))
                 .flatten()
                 .collect();
-            views.extend(children);
+            nodes.extend(children);
         }
     }
-    views
+    nodes
 }

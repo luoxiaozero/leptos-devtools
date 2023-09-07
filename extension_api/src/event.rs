@@ -12,7 +12,7 @@ pub enum Event {
 
 impl Event {
     pub fn into_message(self) -> Message {
-        let mut message = Message::new();
+        let mut message = Message::default();
         message.add_event(self);
         message
     }

@@ -1,4 +1,4 @@
-use crate::component::{merge_component, remove_all, remove_component_children};
+use crate::utils::{merge_component, remove_all, remove_component_children};
 use chrome_wasm_bindgen::*;
 use leptos::*;
 use leptos_devtools_extension_api::{ComponentChildrenRemove, Event, Message};
@@ -25,7 +25,7 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
         for event in payload {
             match event {
                 Event::Component(comp) => {
-                    merge_component(comp.clone());
+                    merge_component(comp);
                     component_update = true;
                 }
                 Event::ComponentChildrenRemove(ComponentChildrenRemove { id, deep }) => {

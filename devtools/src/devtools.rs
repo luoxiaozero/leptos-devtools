@@ -142,7 +142,10 @@ where
                 let mut owner = runtime.owner.borrow_mut();
                 if owner.as_ref().map_or(false, |o| &o.id == id) {
                     if let Some(Owner { id, parent_id }) = owner.take() {
-                        post_message(|| extension::generate_extension_component(&id, parent_id));
+                        post_message(|| {
+                            let comp = extension::generate_extension_component(&id, parent_id);
+                            comp.children
+                        });
                     }
                 }
             }

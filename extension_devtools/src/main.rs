@@ -1,9 +1,12 @@
-mod component;
 mod components;
 mod message;
+mod utils;
 
-use crate::{component::get_component_view, message::on_message};
-use components::Aside;
+use crate::{
+    message::on_message,
+    utils::{gen_nodes, Node},
+};
+use components::{Aside, ComponentNode};
 use leptos::*;
 use std::{collections::HashSet, num::NonZeroU64};
 
@@ -27,7 +30,7 @@ fn App() -> impl IntoView {
         if message_component_update.get() {
             message_component_update.set_untracked(false);
         }
-        get_component_view(None, 0)
+        gen_nodes(None, 0)
     });
 
     let nodes_filter = create_memo(move |_| {
@@ -57,7 +60,10 @@ fn App() -> impl IntoView {
                     each=move || nodes_filter.get()
                     key=|node| node.id.clone()
                     view=|node| {
-                        node.view
+                        let Node { id, name, level } = node;
+                        view! {
+                            <ComponentNode id name level/>
+                        }
                     }
                 />
             </main>

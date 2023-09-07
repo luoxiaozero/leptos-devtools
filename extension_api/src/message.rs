@@ -33,11 +33,20 @@ pub struct Message {
     pub payload: Vec<Event>,
 }
 
-impl Message {
-    pub fn new() -> Self {
+impl Default for Message {
+    fn default() -> Self {
         Self {
             id: LEPTOS_DEVTOOLS_MESSAGE.to_string(),
             payload: vec![],
+        }
+    }
+}
+
+impl Message {
+    pub fn new(payload: Vec<Event>) -> Self {
+        Self {
+            id: LEPTOS_DEVTOOLS_MESSAGE.to_string(),
+            payload,
         }
     }
 
