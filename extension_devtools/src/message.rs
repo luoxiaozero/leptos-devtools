@@ -25,7 +25,7 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
         for event in payload {
             match event {
                 Event::Component(comp) => {
-                    merge_component(comp.clone());
+                    merge_component(comp);
                     component_update = true;
                 }
                 Event::ComponentChildrenRemove(ComponentChildrenRemove { id, deep }) => {
