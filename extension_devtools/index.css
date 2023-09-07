@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    font-family: "Roboto Mono", Menlo, Consolas, monospace;
 }
 
 .node {

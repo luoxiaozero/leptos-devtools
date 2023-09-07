@@ -19,25 +19,22 @@ pub fn ComponentNode(id: NonZeroU64, name: String, level: u64) -> impl IntoView 
     };
     let selected = create_memo(move |_| selected_comp_id.get().map_or(false, |v| v.0 == id));
     view! {
-        <div class="node"
+        <div
+            class="node"
             class:node-selected=move || selected.get()
             on:click=move |_| selected_comp_id.set(Some(SelectedComponentId(id)))
         >
-            <Indent level />
+            <Indent level/>
             <span class="arrow" on:click=arrow_click>
-                <span class="arrow-right" class:arrow-bottom=move || expand_component.with(|ec| ec.contains(&id))>
-                </span>
+                <span
+                    class="arrow-right"
+                    class:arrow-bottom=move || expand_component.with(|ec| ec.contains(&id))
+                ></span>
             </span>
-            <span class="node-component__name">
-                "<"{ name }">"
-            </span>
+            <span class="node-component__name">"<" {name} ">"</span>
             {
                 #[cfg(feature = "development")]
-                view! {
-                    <span class="pl-12px color-#aaa">
-                        "id="{ id }
-                    </span>
-                }
+                view! { <span class="pl-12px color-#bbb">"id=" {id}</span> }
             }
         </div>
     }
@@ -51,9 +48,7 @@ fn Indent(level: u64) -> impl IntoView {
                 each=move || 0..level
                 key=|num| num.clone()
                 view=|_num| {
-                    view! {
-                        <span class="inline-block w-16px"></span>
-                    }
+                    view! { <span class="inline-block w-16px"></span> }
                 }
             />
         </span>

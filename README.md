@@ -59,3 +59,5 @@ When there is a problem, refresh the page or reopen Developer Tools.
 ## Resources
 
 [Solid Devtools](https://github.com/thetarnav/solid-devtools)
+
+[Vue Devtools](https://github.com/vuejs/devtools)
