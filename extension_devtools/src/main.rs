@@ -67,15 +67,7 @@ fn App() -> impl IntoView {
                     }
                 />
             </main>
-            {
-                move || if selected_component_id.get().is_some() {
-                    view! {
-                        <Aside />
-                    }.into()
-                } else {
-                    None
-                }
-            }
+            <Aside />
         </section>
     }
 }

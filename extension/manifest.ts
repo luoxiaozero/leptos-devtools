@@ -19,7 +19,7 @@ export default defineManifest({
     },
     devtools_page: "devtools/devtools.html",
     content_security_policy: {
-        extension_pages: "script-src 'self' 'wasm-unsafe-eval'; default-src 'self';",
+        extension_pages: "script-src 'self' 'wasm-unsafe-eval'; default-src 'self' style-src 'self' 'unsafe-inline';",
     },
     action: {
         default_icon: icons.gray,

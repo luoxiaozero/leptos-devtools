@@ -4,8 +4,7 @@ use serde_json::Value;
 
 #[component]
 pub fn AsideProps() -> impl IntoView {
-    let selected_comp_id = use_context::<RwSignal<Option<SelectedComponentId>>>()
-        .expect("not found SelectedComponentId");
+    let selected_comp_id = expect_context::<RwSignal<Option<SelectedComponentId>>>();
     let props = create_memo(move |_| {
         if let Some(comp_id) = selected_comp_id.get() {
             get_component_props(&comp_id.0)
