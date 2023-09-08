@@ -4,8 +4,10 @@ use leptos::*;
 #[component]
 pub fn Aside() -> impl IntoView {
     view! {
-        <aside class="w-320px p-8px font-size-14px">
-            <AsideProps/>
+        <aside class="w-320px flex font-size-14px">
+            <div class="p-8px overflow-auto">
+                <AsideProps/>
+            </div>
         </aside>
     }
 }

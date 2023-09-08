@@ -27,7 +27,6 @@ pub fn AsideProps() -> impl IntoView {
                             <div class="ml-14px h-20px line-height-20px">
                                 <span class="color-#8128e8">{prop.name}</span>
                                 <span class="mr-0.5em">":"</span>
-
                                 {
                                     if let Some(err) = prop.error {
                                         view! {
@@ -88,7 +87,7 @@ fn Value(value: Value) -> impl IntoView {
         Value::String(value) => {
             view! {
                 <>
-                    <span>{format!(r#""{value}""#)}</span>
+                    <span class="white-space-nowrap">{format!(r#""{value}""#)}</span>
                 </>
             }
         }

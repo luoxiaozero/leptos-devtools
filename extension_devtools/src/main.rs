@@ -55,7 +55,7 @@ fn App() -> impl IntoView {
     });
     view! {
         <section class="flex h-screen">
-            <main class="flex-1 p-8px">
+            <main class="flex-1 p-8px overflow-auto">
                 <For
                     each=move || nodes_filter.get()
                     key=|node| node.id.clone()

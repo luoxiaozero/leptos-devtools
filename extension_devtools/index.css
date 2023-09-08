@@ -1,3 +1,7 @@
+.white-space-nowrap {
+    white-space: nowrap;
+}
+
 body {
     margin: 0;
     font-family: "Roboto Mono", Menlo, Consolas, monospace;
