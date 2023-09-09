@@ -89,3 +89,20 @@ pub(crate) fn get_component_props(comp_id: &NonZeroU64) -> Vec<Prop> {
             .map_or(vec![], |p| p.to_vec())
     })
 }
+
+#[derive(PartialEq, Clone)]
+pub(crate) struct ComponentInfo {
+    pub location: Option<String>,
+}
+
+pub(crate) fn get_component_info(comp_id: &NonZeroU64) -> Option<ComponentInfo> {
+    with_component_store(|store| {
+        store
+            .components
+            .borrow()
+            .get(comp_id)
+            .map(|comp| ComponentInfo {
+                location: comp.location.clone(),
+            })
+    })
+}

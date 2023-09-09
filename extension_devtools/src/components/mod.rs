@@ -1,4 +1,5 @@
 mod aside;
+mod aside_component;
 mod aside_props;
 mod component_node;
 

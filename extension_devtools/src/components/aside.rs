@@ -1,3 +1,4 @@
+use super::aside_component::AsideComponentInfo;
 use super::aside_props::AsideProps;
 use crate::SelectedComponentId;
 use leptos::*;
@@ -42,6 +43,7 @@ pub fn Aside() -> impl IntoView {
             <div class="relative w-6px left--3px cursor-ew-resize" on:mousedown=on_mouse_down></div>
             <div class="p-8px overflow-auto">
                 <AsideProps/>
+                <AsideComponentInfo />
             </div>
         </aside>
     }

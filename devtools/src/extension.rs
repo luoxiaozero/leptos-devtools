@@ -16,6 +16,7 @@ pub(crate) fn generate_extension_component(
             name: comp.name().clone(),
             props: comp.props().clone(),
             children: vec![],
+            location: comp.location().clone(),
         }
     });
 

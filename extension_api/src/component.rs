@@ -14,6 +14,7 @@ pub struct Component {
     pub name: String,
     pub props: Option<String>,
     pub children: Vec<Component>,
+    pub location: Option<String>,
 }
 
 impl Component {

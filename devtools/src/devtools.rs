@@ -52,7 +52,11 @@ where
             with_runtime(|runtime| {
                 runtime.components.borrow_mut().insert(
                     id.clone(),
-                    Component::new(name.to_string(), metadata.target().to_string()),
+                    Component::new(
+                        name.to_string(),
+                        location(metadata.file(), metadata.line()),
+                        metadata.target().to_string(),
+                    ),
                 );
 
                 let mut owner = runtime.owner.borrow_mut();
@@ -170,5 +174,15 @@ impl Visit for PropsVisitor {
         if field.name() == "props" {
             self.0 = Some(value.to_string());
         }
+    }
+}
+
+fn location<'a>(file: Option<&'a str>, line: Option<u32>) -> Option<String> {
+    match (file, line) {
+        (Some(file), Some(line)) => Some(format!("{}:{}", file, line)),
+        (Some(file), None) => Some(format!("{}", file)),
+        // Note: a line num with no file is a kind of weird case that _probably_ never occurs...
+        (None, Some(line)) => Some(format!(":{}", line)),
+        (None, None) => None,
     }
 }
