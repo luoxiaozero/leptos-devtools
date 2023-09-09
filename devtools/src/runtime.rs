@@ -1,5 +1,4 @@
-use crate::{component::Component, extension};
-use leptos_devtools_extension_api::{Event, Message, OnEvent, OnMessage, PostMessage};
+use crate::component::Component;
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -40,7 +39,7 @@ impl Owner {
     }
 }
 
-pub fn remove_component_children(id: &span::Id) {
+pub(crate) fn remove_component_children(id: &span::Id) {
     let children = with_runtime(|runtime| {
         let Some(children) = runtime.component_tree.borrow_mut().remove(id) else {
             return None;
@@ -58,54 +57,4 @@ pub fn remove_component_children(id: &span::Id) {
             remove_component_children(id);
         })
     }
-}
-
-pub fn on_message() {
-    OnMessage::on_message(|OnMessage { payload, .. }| {
-        for event in payload {
-            match event {
-                OnEvent::DevtoolsPanelOpenStatus(status) => {
-                    let roots = with_runtime(|runtime| {
-                        *runtime.devtools_panel_open_status.borrow_mut() = status;
-                        if status {
-                            Some(runtime.component_tree_root.borrow().clone())
-                        } else {
-                            Event::OpenDevtoolsPanel
-                                .into_message()
-                                .post_message()
-                                .unwrap();
-                            None
-                        }
-                    });
-
-                    let Some(roots) = roots else {
-                        return;
-                    };
-                    if roots.is_empty() {
-                        return;
-                    }
-
-                    let payload = roots
-                        .into_iter()
-                        .map(|root| {
-                            extension::generate_extension_component(&root, None).into_event()
-                        })
-                        .collect();
-                    Message::new(payload).post_message().unwrap()
-                }
-            }
-        }
-    })
-    .unwrap();
-}
-
-pub fn post_message<T>(f: impl FnOnce() -> T)
-where
-    T: PostMessage,
-{
-    with_runtime(|runtime| {
-        if *runtime.devtools_panel_open_status.borrow() {
-            f().post_message().unwrap()
-        }
-    });
 }

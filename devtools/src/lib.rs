@@ -4,7 +4,7 @@ mod extension;
 mod runtime;
 
 use devtools::Devtools;
-use runtime::on_message;
+use extension::on_message;
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
 
 pub fn devtools() {

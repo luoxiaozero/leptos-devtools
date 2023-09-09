@@ -1,7 +1,7 @@
 use crate::{
     component::Component,
-    extension,
-    runtime::{post_message, remove_component_children, with_runtime, Owner},
+    extension::{generate_extension_component, post_message},
+    runtime::{remove_component_children, with_runtime, Owner},
 };
 use regex::Regex;
 use std::fmt::Debug;
@@ -133,7 +133,7 @@ where
 
                 let mut owner = runtime.owner.borrow_mut();
                 if let Some(Owner { id, parent_id }) = owner.take() {
-                    post_message(|| extension::generate_extension_component(&id, parent_id));
+                    post_message(|| generate_extension_component(&id, parent_id));
                 }
                 return;
             }
@@ -147,7 +147,7 @@ where
                 if owner.as_ref().map_or(false, |o| &o.id == id) {
                     if let Some(Owner { id, parent_id }) = owner.take() {
                         post_message(|| {
-                            let comp = extension::generate_extension_component(&id, parent_id);
+                            let comp = generate_extension_component(&id, parent_id);
                             comp.children
                         });
                     }
