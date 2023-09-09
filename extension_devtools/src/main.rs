@@ -22,6 +22,7 @@ fn App() -> impl IntoView {
     let message_component_update = create_rw_signal::<bool>(false);
     let selected_component_id = create_rw_signal::<Option<SelectedComponentId>>(None);
     let expand_component = create_rw_signal(HashSet::<NonZeroU64>::new());
+    let aside_width = create_rw_signal(320);
     provide_context(selected_component_id);
     provide_context(expand_component);
     on_message(message_component_update);
@@ -68,9 +69,9 @@ fn App() -> impl IntoView {
                         }
                     />
                 </div>
-                <Crumb />
+                <Crumb aside_width/>
             </main>
-            <Aside />
+            <Aside aside_width/>
         </section>
     }
 }

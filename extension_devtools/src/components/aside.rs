@@ -4,8 +4,7 @@ use crate::SelectedComponentId;
 use leptos::*;
 
 #[component]
-pub fn Aside() -> impl IntoView {
-    let mouse_move_value = create_rw_signal::<Option<i32>>(None);
+pub fn Aside(aside_width: RwSignal<i32>) -> impl IntoView {
     let is_mouse_move = create_rw_signal(false);
     let on_mouse_down = move |_| {
         is_mouse_move.set(true);
@@ -19,11 +18,11 @@ pub fn Aside() -> impl IntoView {
             let ev_x = ev.x();
             let client_width = document().body().unwrap().client_width();
             if ev_x <= 320 {
-                mouse_move_value.set(Some(client_width - 320));
+                aside_width.set(client_width - 320);
             } else if ev_x >= client_width - 320 {
-                mouse_move_value.set(Some(320));
+                aside_width.set(320);
             } else {
-                mouse_move_value.set(Some(client_width - ev_x));
+                aside_width.set(client_width - ev_x);
             }
         }
     });
@@ -32,14 +31,12 @@ pub fn Aside() -> impl IntoView {
     let style = create_memo(move |_| {
         if selected_comp_id.get().is_none() {
             String::from("display: none;")
-        } else if let Some(value) = mouse_move_value.get() {
-            format!("width: {value}px")
         } else {
-            String::new()
+            format!("width: {}px", aside_width.get())
         }
     });
     view! {
-        <aside class="w-320px flex font-size-14px" style=move || style.get()>
+        <aside class="flex font-size-14px box-border" style=move || style.get()>
             <div class="relative w-6px left--3px cursor-ew-resize" on:mousedown=on_mouse_down></div>
             <div class="p-8px overflow-auto">
                 <AsideProps/>
