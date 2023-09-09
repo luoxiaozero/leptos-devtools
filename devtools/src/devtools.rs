@@ -3,7 +3,6 @@ use crate::{
     extension::{generate_extension_component, post_message},
     runtime::{remove_component_children, with_runtime, Owner},
 };
-use regex::Regex;
 use std::fmt::Debug;
 use tracing::{
     field::{Field, Visit},
@@ -21,8 +20,9 @@ where
 {
     fn on_new_span(&self, attrs: &span::Attributes<'_>, id: &span::Id, _ctx: Context<'_, S>) {
         let metadata = attrs.metadata();
+        let name = metadata.name();
 
-        if metadata.name() == "leptos_dom::tracing_props" {
+        if name == "leptos_dom::tracing_props" {
             let mut visitor = PropsVisitor(None);
             attrs.record(&mut visitor);
 
@@ -36,36 +36,36 @@ where
             return;
         }
 
-        if metadata.target() == "leptos_dom::components" && metadata.name() == "<Component />" {
+        if metadata.target() == "leptos_dom::components" && name == "<Component />" {
             return;
         }
-        if metadata.target() == "leptos_dom::html" && metadata.name() == "<HtmlElement />" {
+        if metadata.target() == "leptos_dom::html" && name == "<HtmlElement />" {
             return;
         }
 
-        let re = Regex::new(r"^<(.*?) />$").unwrap();
-        if let Some(name) = re
-            .captures(metadata.name())
-            .map(|cap| cap.get(1).map(|v| v.as_str()))
-            .flatten()
-        {
-            with_runtime(|runtime| {
-                runtime.components.borrow_mut().insert(
-                    id.clone(),
-                    Component::new(
-                        name.to_string(),
-                        location(metadata.file(), metadata.line()),
-                        metadata.target().to_string(),
-                    ),
-                );
-
-                let mut owner = runtime.owner.borrow_mut();
-                if owner.is_none() {
-                    let ancestors = runtime.ancestors.borrow_mut();
-                    *owner = Some(Owner::new(id.clone(), ancestors.first().cloned()));
-                }
-            });
+        if !name.starts_with("<") || !name.ends_with(" />") {
+            return;
         }
+        let Some(name) = name.get(1..(name.len() - 3)) else {
+            return;
+        };
+
+        with_runtime(|runtime| {
+            runtime.components.borrow_mut().insert(
+                id.clone(),
+                Component::new(
+                    name.to_string(),
+                    location(metadata.file(), metadata.line()),
+                    metadata.target().to_string(),
+                ),
+            );
+
+            let mut owner = runtime.owner.borrow_mut();
+            if owner.is_none() {
+                let ancestors = runtime.ancestors.borrow_mut();
+                *owner = Some(Owner::new(id.clone(), ancestors.first().cloned()));
+            }
+        });
     }
 
     fn on_enter(&self, id: &span::Id, _ctx: Context<'_, S>) {

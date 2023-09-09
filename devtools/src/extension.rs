@@ -63,7 +63,7 @@ pub(crate) fn on_message() {
                         .into_iter()
                         .map(|root| generate_extension_component(&root, None).into_event())
                         .collect();
-                    Message::new(payload).post_message().unwrap()
+                    Message::new(payload).post_message().unwrap();
                 }
             }
         }
@@ -77,7 +77,7 @@ where
 {
     with_runtime(|runtime| {
         if *runtime.devtools_panel_open_status.borrow() {
-            f().post_message().unwrap()
+            f().post_message().unwrap();
         }
     });
 }
