@@ -6,7 +6,7 @@ use crate::{
     message::on_message,
     utils::{gen_nodes, Node},
 };
-use components::{Aside, ComponentNode};
+use components::{Aside, ComponentNode, Crumb};
 use leptos::*;
 use std::{collections::HashSet, num::NonZeroU64};
 
@@ -55,17 +55,20 @@ fn App() -> impl IntoView {
     });
     view! {
         <section class="flex h-screen">
-            <main class="flex-1 p-8px overflow-auto">
-                <For
-                    each=move || nodes_filter.get()
-                    key=|node| node.id.clone()
-                    view=|node| {
-                        let Node { id, name, level } = node;
-                        view! {
-                            <ComponentNode id name level/>
+            <main class="flex-1 flex flex-col">
+                <div class="flex-1 p-8px overflow-auto">
+                    <For
+                        each=move || nodes_filter.get()
+                        key=|node| node.id.clone()
+                        view=|node| {
+                            let Node { id, name, level } = node;
+                            view! {
+                                <ComponentNode id name level/>
+                            }
                         }
-                    }
-                />
+                    />
+                </div>
+                <Crumb />
             </main>
             <Aside />
         </section>

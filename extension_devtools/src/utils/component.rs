@@ -106,3 +106,34 @@ pub(crate) fn get_component_info(comp_id: &NonZeroU64) -> Option<ComponentInfo> 
             })
     })
 }
+
+#[derive(PartialEq, Clone)]
+pub(crate) struct ComponentCrumb {
+    pub id: NonZeroU64,
+    pub name: String,
+}
+
+pub(crate) fn get_component_crumbs(comp_id: &NonZeroU64) -> Vec<ComponentCrumb> {
+    with_component_store(|store| {
+        let mut crumbs = vec![];
+        let mut comp_id = comp_id.clone();
+        let components = store.components.borrow();
+        loop {
+            if let Some(comp) = components.get(&comp_id) {
+                crumbs.push(ComponentCrumb {
+                    id: comp.id,
+                    name: comp.name.clone(),
+                });
+                if let Some(parent_id) = comp.parent_id {
+                    comp_id = parent_id
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        crumbs.reverse();
+        crumbs
+    })
+}
