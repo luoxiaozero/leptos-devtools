@@ -36,6 +36,11 @@ where
             return;
         }
 
+        // whether is component
+        if !name.starts_with("<") || !name.ends_with(" />") {
+            return;
+        }
+
         if metadata.target() == "leptos_dom::components" && name == "<Component />" {
             return;
         }
@@ -43,9 +48,6 @@ where
             return;
         }
 
-        if !name.starts_with("<") || !name.ends_with(" />") {
-            return;
-        }
         let Some(name) = name.get(1..(name.len() - 3)) else {
             return;
         };
