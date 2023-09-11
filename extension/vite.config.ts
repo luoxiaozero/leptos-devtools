@@ -5,6 +5,13 @@ import manifest from "./manifest"
 
 export default defineConfig(({ mode }) => {
     const config: UserConfig = {
+        build: {
+            rollupOptions: {
+                input: {
+                    popupEnabled: "popup/popup-enabled.html",
+                },
+            },
+        },
         plugins: [
             crx({ manifest }),
             copy({
@@ -23,9 +30,7 @@ export default defineConfig(({ mode }) => {
     }
 
     if (mode === "development") {
-        config.build = {
-            minify: false,
-        }
+        config.build!.minify = false
     }
 
     return config

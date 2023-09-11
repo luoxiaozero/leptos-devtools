@@ -1,6 +1,7 @@
 import { defineManifest } from "@crxjs/vite-plugin"
 import { version } from "./package.json"
 import icons from "./utils/icon"
+import popups from "./popup/popup"
 
 export default defineManifest({
     manifest_version: 3,
@@ -25,7 +26,7 @@ export default defineManifest({
     action: {
         default_icon: icons.gray,
         default_title: "Leptos Devtools",
-        default_popup: "popup/popup.html",
+        default_popup: popups.disabled,
     },
     icons: icons.normal,
 })
