@@ -3,7 +3,6 @@ export const LEPTOS_DEVTOOLS_ON_MESSAGE = "LEPTOS_DEVTOOLS_ON_MESSAGE"
 
 export const enum ConnectionName {
     Content = "LEPTOS_DEVTOOLS_CONTENT",
-    Popup = "LEPTOS_DEVTOOLS_POPUP",
     Devtools = "LEPTOS_DEVTOOLS_DEVTOOLS",
     Developer = "LEPTOS_DEVTOOLS_DEVELOPER",
 }
