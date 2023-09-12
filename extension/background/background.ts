@@ -6,7 +6,6 @@ import { createPortMessanger } from "../utils/bridge"
 import popups from "../popup/popup"
 
 const devtoolsPanelPortMap = new Map<number, chrome.runtime.Port>()
-const isLepotsSet = new Set<number>()
 const developerToolsPortMap = new Map<number, chrome.runtime.Port>()
 const contentPortMap = new Map<number, chrome.runtime.Port>()
 
@@ -15,31 +14,19 @@ const contentPortMap = new Map<number, chrome.runtime.Port>()
 
 function handleContent(port: chrome.runtime.Port) {
     const { postPortMessage: toContent, onPortMessage: fromContent } = createPortMessanger(port)
+    const tabId = port.sender!.tab!.id!
+    toContent(
+        createOnMessage({
+            DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
+        })
+    )
+    chrome.action.setIcon({ tabId, path: icons.normal })
+    chrome.action.setPopup({ tabId, popup: popups.enabled })
+    contentPortMap.set(tabId, port)
 
     fromContent((message: Message, port) => {
         const tabId = port.sender!.tab!.id!
-        if (!contentPortMap.has(tabId)) {
-            contentPortMap.set(tabId, port)
-        }
 
-        if (message.payload.length === 1) {
-            if (message.payload[0] === "DevtoolsPanelOpenStatus") {
-                toContent(
-                    createOnMessage({
-                        DevtoolsPanelOpenStatus: devtoolsPanelPortMap.has(tabId),
-                    })
-                )
-                return
-            } else if (message.payload[0] === "OpenDevtoolsPanel") {
-                chrome.action.setIcon({ tabId, path: icons.normal })
-                chrome.action.setPopup({ tabId, popup: popups.enabled })
-                if (!isLepotsSet.has(tabId)) {
-                    isLepotsSet.add(tabId)
-                }
-            } else if (message.payload[0] === "PageUnload") {
-                isLepotsSet.delete(tabId)
-            }
-        }
         const devtoolsPanelPort = devtoolsPanelPortMap.get(tabId)
         if (devtoolsPanelPort) {
             devtoolsPanelPort.postMessage(message)
@@ -78,7 +65,7 @@ chrome.runtime.onConnect.addListener(port => {
                         return
                     }
                     developerToolsPortMap.set(tabId, port)
-                    if (isLepotsSet.has(tabId)) {
+                    if (contentPortMap.has(tabId)) {
                         port.postMessage(createMessage("OpenDevtoolsPanel"))
                     }
                 }

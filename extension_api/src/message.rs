@@ -10,6 +10,17 @@ thread_local! {
     static WINDOW: web_sys::Window = web_sys::window().unwrap_throw();
 }
 
+pub fn register_leptos() {
+    _ = WINDOW.with(|window| {
+        js_sys::Reflect::set(
+            window,
+            &wasm_bindgen::JsValue::from("__LEPTOS_DEVTOOLS__"),
+            &wasm_bindgen::JsValue::TRUE,
+        )
+        .unwrap()
+    });
+}
+
 fn post_message(message: &wasm_bindgen::JsValue) -> Result<(), JsValue> {
     WINDOW.with(|window| window.post_message(message, "*"))
 }
