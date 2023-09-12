@@ -20,6 +20,9 @@ fromBackground(message => {
         }
         chrome.devtools.panels.create("Leptos", "", "index.html", newPanel => {
             panel = newPanel
+            // TODO pref: hidden and shown
+            // panel.onHidden
+            // panel.onShown
         })
     }
 })

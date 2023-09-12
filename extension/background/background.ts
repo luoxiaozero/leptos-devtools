@@ -41,6 +41,10 @@ function handleContent(port: chrome.runtime.Port) {
         for (const [key, value] of contentPortMap.entries()) {
             if (port === value) {
                 contentPortMap.delete(key)
+                const devtoolsPanelPort = devtoolsPanelPortMap.get(key)
+                if (devtoolsPanelPort) {
+                    devtoolsPanelPort.postMessage(createMessage("PageUnload"))
+                }
                 break
             }
         }
