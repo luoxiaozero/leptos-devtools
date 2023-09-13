@@ -2,14 +2,7 @@ import { createPortMessanger } from "../utils/bridge"
 import { ConnectionName } from "../utils/constant"
 
 const port = chrome.runtime.connect({ name: ConnectionName.Developer })
-const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
-toBackground({
-    payload: [
-        {
-            TabId: chrome.devtools.inspectedWindow.tabId,
-        },
-    ],
-})
+const { onPortMessage: fromBackground } = createPortMessanger(port)
 
 let panel: chrome.devtools.panels.ExtensionPanel | null = null
 
