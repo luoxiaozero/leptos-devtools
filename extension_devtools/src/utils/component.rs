@@ -92,6 +92,7 @@ pub(crate) fn get_component_props(comp_id: &NonZeroU64) -> Vec<Prop> {
 
 #[derive(PartialEq, Clone)]
 pub(crate) struct ComponentInfo {
+    pub name: String,
     pub location: Option<String>,
 }
 
@@ -102,6 +103,7 @@ pub(crate) fn get_component_info(comp_id: &NonZeroU64) -> Option<ComponentInfo> 
             .borrow()
             .get(comp_id)
             .map(|comp| ComponentInfo {
+                name: comp.name.clone(),
                 location: comp.location.clone(),
             })
     })

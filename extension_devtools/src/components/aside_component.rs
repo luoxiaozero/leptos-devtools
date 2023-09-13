@@ -17,7 +17,7 @@ pub fn AsideComponentInfo() -> impl IntoView {
 
     move || {
         if let Some(info) = info.get() {
-            let ComponentInfo { location } = info;
+            let ComponentInfo { location, .. } = info;
             view! {
                 <div class="my-6px">"component"</div>
                 <div class="ml-14px h-20px line-height-20px">

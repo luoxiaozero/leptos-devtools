@@ -1,5 +1,6 @@
 use super::aside_component::AsideComponentInfo;
 use super::aside_props::AsideProps;
+use crate::utils::{get_component_info, ComponentInfo};
 use crate::SelectedComponentId;
 use leptos::*;
 
@@ -28,6 +29,15 @@ pub fn Aside(aside_width: RwSignal<i32>) -> impl IntoView {
     });
     on_cleanup(move || on_mouse_move.remove());
     let selected_comp_id = expect_context::<RwSignal<Option<SelectedComponentId>>>();
+
+    let info = create_memo(move |_| {
+        if let Some(comp_id) = selected_comp_id.get() {
+            get_component_info(&comp_id.0)
+        } else {
+            None
+        }
+    });
+
     let style = create_memo(move |_| {
         if selected_comp_id.get().is_none() {
             String::from("display: none;")
@@ -36,9 +46,42 @@ pub fn Aside(aside_width: RwSignal<i32>) -> impl IntoView {
         }
     });
     view! {
-        <aside class="flex font-size-14px box-border" style=move || style.get()>
-            <div class="relative w-6px left--3px cursor-ew-resize" on:mousedown=on_mouse_down></div>
-            <div class="p-8px overflow-auto">
+        <aside class="relative flex flex-col font-size-14px box-border" style=move || style.get()>
+            <div class="absolute w-6px top-0 bottom-0 left--3px cursor-ew-resize" on:mousedown=on_mouse_down></div>
+            <div class="h-28px line-height-28px px-8px b-b b-b-solid b-b-#ddd flex flex-justify-between">
+                {
+                    move || {
+                        if let Some(info) = info.get() {
+                            let ComponentInfo { name, location } = info;
+                            // TODO option
+                            let location_title = format!("Open {:?} in vscode", location);
+                            let open_editor = move |_| {
+                                if let Some(location) = location.clone() {
+                                    // TODO project dir
+                                    let url = format!("vscode://file/{:?}", location);
+                                    _ = window().location().assign(&url);
+                                }
+                            };
+                            view! {
+                                <span class="color-#2080f0">
+                                    "<"{ name }">"
+                                </span>
+                                <span class="flex hover-bg-#f3f3f5 cursor-pointer px-2px" title=location_title on:click=open_editor>
+                                    <svg class="w-20px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+                                        <circle cx="256" cy="256" r="26" fill="currentColor"></circle><circle cx="346" cy="256" r="26" fill="currentColor"></circle>
+                                        <circle cx="166" cy="256" r="26" fill="currentColor"></circle>
+                                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M160 368L32 256l128-112"></path>
+                                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M352 368l128-112l-128-112"></path>
+                                    </svg>
+                                </span>
+                            }.into()
+                        } else {
+                            None
+                        }
+                    }
+                }
+            </div>
+            <div class="flex-1 p-8px pt-2px overflow-auto">
                 <AsideProps/>
                 <AsideComponentInfo />
             </div>
