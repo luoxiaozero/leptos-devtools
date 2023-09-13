@@ -9,12 +9,12 @@ pub(crate) fn chrome() -> Option<Chrome> {
     Some(obj.unchecked_into())
 }
 
-const LEPTOS_DEVTOOLS_DEVTOOLS: &str = "LEPTOS_DEVTOOLS_DEVTOOLS";
+const LEPTOS_DEVTOOLS_PANEL: &str = "LEPTOS_DEVTOOLS_PANEL";
 
 pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
     let port = chrome().unwrap().runtime().connect_with_connect_info(
         ConnectInfo {
-            name: Some(LEPTOS_DEVTOOLS_DEVTOOLS),
+            name: Some(LEPTOS_DEVTOOLS_PANEL),
         }
         .into(),
     );
@@ -32,7 +32,6 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
                     remove_component_children(&id, deep);
                     component_update = true;
                 }
-                Event::TabId(_) => {}
                 Event::OpenDevtoolsPanel => {}
                 Event::PageUnload => {
                     remove_all();
@@ -46,6 +45,4 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
     })
     .into_js_value();
     port.on_message().add_listener(&on_message.unchecked_ref());
-    let event = Event::TabId(chrome().unwrap().devtools().inspected_window().tab_id());
-    port.post_message(event.into_message().into_js_value())
 }
