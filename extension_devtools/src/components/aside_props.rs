@@ -23,7 +23,7 @@ pub fn AsideProps() -> impl IntoView {
                 {
                     props.into_iter().map(|prop| {
                         view! {
-                            <div class="ml-14px h-20px line-height-20px">
+                            <div class="ml-14px min-h-20px line-height-20px">
                                 <span class="color-#8128e8">{prop.name}</span>
                                 <span class="mr-0.5em">":"</span>
                                 {
@@ -97,7 +97,7 @@ fn Value(value: Value) -> impl IntoView {
                         {
                             arr.into_iter().enumerate().map(|(index, value)| {
                                 view! {
-                                    <div class="h-20px line-height-20px">
+                                    <div class="min-h-20px line-height-20px">
                                         <span class="color-#8128e8">{index}</span>
                                         <span class="mr-0.5em">":"</span>
                                         <Value value/>
@@ -117,7 +117,7 @@ fn Value(value: Value) -> impl IntoView {
                         {
                             obj.into_iter().map(|(key, value)| {
                                 view! {
-                                    <div class="h-20px line-height-20px">
+                                    <div class="min-h-20px line-height-20px">
                                         <span class="color-#8128e8">{format!(r#""{key}""#)}</span>
                                         <span class="mr-0.5em">":"</span>
                                         <Value value/>
