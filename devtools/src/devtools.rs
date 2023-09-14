@@ -57,7 +57,12 @@ where
                 id.clone(),
                 Component::new(
                     name.to_string(),
-                    location(metadata.file(), metadata.line()),
+                    location(
+                        runtime.cargo_manifest_dir.borrow().clone(),
+                        metadata.module_path(),
+                        metadata.file(),
+                        metadata.line(),
+                    ),
                     metadata.target().to_string(),
                 ),
             );
@@ -179,12 +184,33 @@ impl Visit for PropsVisitor {
     }
 }
 
-fn location<'a>(file: Option<&'a str>, line: Option<u32>) -> Option<String> {
-    match (file, line) {
-        (Some(file), Some(line)) => Some(format!("{}:{}", file, line)),
-        (Some(file), None) => Some(format!("{}", file)),
-        // Note: a line num with no file is a kind of weird case that _probably_ never occurs...
-        (None, Some(line)) => Some(format!(":{}", line)),
+fn location<'a>(
+    cargo_manifest_dir: Option<String>,
+    module_path: Option<&'a str>,
+    file: Option<&'a str>,
+    line: Option<u32>,
+) -> Option<String> {
+    let full_path = match (cargo_manifest_dir, module_path, file) {
+        (None, None, None)
+        | (None, Some(_), None)
+        | (Some(_), None, None)
+        | (Some(_), Some(_), None) => None,
+        (None, None, Some(file)) | (None, Some(_), Some(file)) | (Some(_), None, Some(file)) => {
+            Some(file.to_string())
+        }
+        (Some(dir), Some(module_path), Some(file)) => {
+            if file.starts_with(module_path) {
+                Some(format!("{dir}{}", &file[module_path.len()..file.len()]))
+            } else {
+                Some(file.to_string())
+            }
+        }
+    };
+
+    match (full_path, line) {
         (None, None) => None,
+        (None, Some(line)) => Some(format!(":{}", line)),
+        (Some(path), None) => Some(path),
+        (Some(path), Some(line)) => Some(format!("{}:{}", path, line)),
     }
 }

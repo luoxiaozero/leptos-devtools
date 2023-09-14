@@ -8,6 +8,8 @@ use extension::on_message;
 use leptos_devtools_extension_api::register_leptos;
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
 
+pub use runtime::set_cargo_manifest_dir;
+
 pub fn devtools() {
     register_leptos();
     on_message();
@@ -23,4 +25,12 @@ pub fn devtools() {
         .finish()
         .with(Devtools::default())
         .init();
+}
+
+#[macro_export]
+macro_rules! devtools {
+    () => {
+        leptos_devtools::set_cargo_manifest_dir(env!("CARGO_MANIFEST_DIR").to_string());
+        leptos_devtools::devtools();
+    };
 }

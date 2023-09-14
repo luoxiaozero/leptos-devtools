@@ -53,12 +53,10 @@ pub fn Aside(aside_width: RwSignal<i32>) -> impl IntoView {
                     move || {
                         if let Some(info) = info.get() {
                             let ComponentInfo { name, location } = info;
-                            // TODO option
-                            let location_title = format!("Open {:?} in vscode", location);
+                            let location_title = format!("Open {} in vscode", location.clone().unwrap_or(String::new()));
                             let open_editor = move |_| {
                                 if let Some(location) = location.clone() {
-                                    // TODO project dir
-                                    let url = format!("vscode://file/{:?}", location);
+                                    let url = format!("vscode://file/{}", location);
                                     _ = window().location().assign(&url);
                                 }
                             };

@@ -11,6 +11,8 @@ thread_local! {
 
 #[derive(Default)]
 pub(crate) struct Runtime {
+    pub cargo_manifest_dir: RefCell<Option<String>>,
+
     pub ancestors: RefCell<Vec<span::Id>>,
     pub owner: RefCell<Option<Owner>>,
 
@@ -57,4 +59,10 @@ pub(crate) fn remove_component_children(id: &span::Id) {
             remove_component_children(id);
         })
     }
+}
+
+pub fn set_cargo_manifest_dir(dir: String) {
+    with_runtime(|runtime| {
+        *runtime.cargo_manifest_dir.borrow_mut() = Some(dir);
+    })
 }
