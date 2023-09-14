@@ -10,5 +10,4 @@ license = "MIT"
 [dependencies]
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
-tracing-subscriber-wasm = "0.1.0"
 leptos_devtools_extension_api = { workspace = true }

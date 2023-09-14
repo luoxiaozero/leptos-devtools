@@ -48,7 +48,7 @@ pub fn Aside(aside_width: RwSignal<i32>) -> impl IntoView {
     view! {
         <aside class="relative flex flex-col font-size-14px box-border" style=move || style.get()>
             <div class="absolute w-6px top-0 bottom-0 left--3px cursor-ew-resize" on:mousedown=on_mouse_down></div>
-            <div class="h-28px line-height-28px px-8px b-b b-b-solid b-b-#ddd flex flex-justify-between">
+            <div class="h-26px line-height-26px px-8px b-b b-b-solid b-b-#ddd flex flex-justify-between">
                 {
                     move || {
                         if let Some(info) = info.get() {
@@ -64,8 +64,8 @@ pub fn Aside(aside_width: RwSignal<i32>) -> impl IntoView {
                                 <span class="color-#2080f0">
                                     "<"{ name }">"
                                 </span>
-                                <span class="flex hover-bg-#f3f3f5 cursor-pointer px-2px" title=location_title on:click=open_editor>
-                                    <svg class="w-20px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+                                <span class="flex hover-bg-#f3f3f5 cursor-pointer px-4px" title=location_title on:click=open_editor>
+                                    <svg class="w-18px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
                                         <circle cx="256" cy="256" r="26" fill="currentColor"></circle><circle cx="346" cy="256" r="26" fill="currentColor"></circle>
                                         <circle cx="166" cy="256" r="26" fill="currentColor"></circle>
                                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M160 368L32 256l128-112"></path>
