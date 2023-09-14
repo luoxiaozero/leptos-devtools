@@ -8,7 +8,7 @@ edition = "2021"
 
 [dependencies]
 leptos_devtools_extension_api = { path = "../extension_api" }
-chrome-wasm-bindgen = { git = "https://github.com/luoxiaozero/chrome-wasm-bindgen.git" }
+chrome-wasm-bindgen = "0.0.1"
 leptos = { version = "0.5.0-rc1", features = ["nightly", "csr"] }
 wasm-bindgen = "0.2.87"
 serde = { version = "1.0.188", features = ["derive"] }
