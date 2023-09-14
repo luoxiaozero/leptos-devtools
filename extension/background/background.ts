@@ -13,7 +13,11 @@ let activeTabId: number = -1
 chrome.tabs.onActivated.addListener(({ tabId }) => (activeTabId = tabId))
 
 function handleContent(port: chrome.runtime.Port) {
-    const { postPortMessage: toContent, onPortMessage: fromContent } = createPortMessanger(port)
+    const {
+        postPortMessage: toContent,
+        onPortMessage: fromContent,
+        onDisconnect,
+    } = createPortMessanger(port)
     const tabId = port.sender!.tab!.id!
     toContent(
         createOnMessage({
@@ -37,16 +41,11 @@ function handleContent(port: chrome.runtime.Port) {
             }
         }
     })
-    port.onDisconnect.addListener(port => {
-        for (const [key, value] of contentPortMap.entries()) {
-            if (port === value) {
-                contentPortMap.delete(key)
-                const devtoolsPanelPort = panelPortMap.get(key)
-                if (devtoolsPanelPort) {
-                    devtoolsPanelPort.postMessage(createMessage("PageUnload"))
-                }
-                break
-            }
+    onDisconnect(() => {
+        contentPortMap.delete(tabId)
+        const devtoolsPanelPort = panelPortMap.get(tabId)
+        if (devtoolsPanelPort) {
+            devtoolsPanelPort.postMessage(createMessage("PageUnload"))
         }
     })
 }
