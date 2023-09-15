@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["devtools", "example", "extension_api", "extension_devtools"]
+exclude = ["examples"]
 
 [workspace.package]
 version = "0.0.0"
