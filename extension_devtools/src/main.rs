@@ -25,7 +25,7 @@ fn App() -> impl IntoView {
     let aside_width = create_rw_signal(320);
     provide_context(selected_component_id);
     provide_context(expand_component);
-    on_message(message_component_update);
+    on_message(message_component_update, selected_component_id);
 
     let nodes = create_memo(move |_| {
         if message_component_update.get() {

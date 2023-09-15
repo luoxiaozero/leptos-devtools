@@ -1,4 +1,7 @@
-use crate::utils::{merge_component, remove_all, remove_component_children};
+use crate::{
+    utils::{merge_component, remove_all, remove_component_children},
+    SelectedComponentId,
+};
 use chrome_wasm_bindgen::*;
 use leptos::*;
 use leptos_devtools_extension_api::{ComponentChildrenRemove, Event, Message};
@@ -11,7 +14,10 @@ pub(crate) fn chrome() -> Option<Chrome> {
 
 const LEPTOS_DEVTOOLS_PANEL: &str = "LEPTOS_DEVTOOLS_PANEL";
 
-pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
+pub(crate) fn on_message(
+    message_component_update: RwSignal<bool>,
+    selected_component_id: RwSignal<Option<SelectedComponentId>>,
+) {
     let port = chrome().unwrap().runtime().connect_with_connect_info(
         ConnectInfo {
             name: Some(LEPTOS_DEVTOOLS_PANEL),
@@ -35,6 +41,7 @@ pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
                 Event::OpenDevtoolsPanel => {}
                 Event::PageUnload => {
                     remove_all();
+                    selected_component_id.set(None);
                     component_update = true;
                 }
             }

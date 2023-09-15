@@ -75,6 +75,7 @@ pub fn remove_component_children(id: &NonZeroU64, deep: bool) {
 pub fn remove_all() {
     with_component_store(|store| {
         store.components.borrow_mut().clear();
+        store.props.borrow_mut().clear();
         store.tree_root.borrow_mut().clear();
         store.tree.borrow_mut().clear();
     });

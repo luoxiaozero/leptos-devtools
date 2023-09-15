@@ -19,8 +19,6 @@ pub fn devtools() {
         .with_file(true)
         .with_line_number(true)
         .with_target(false)
-        .with_ansi(false)
-        .pretty()
         .finish()
         .with(Devtools::default())
         .init();
