@@ -7,6 +7,8 @@ export default defineManifest({
     manifest_version: 3,
     name: "Leptos Devtools",
     version,
+    description: "Browser DevTools extension for debugging Leptos applications.",
+    homepage_url: "https://github.com/luoxiaozero/leptos-devtools",
     content_scripts: [
         {
             js: ["content/content.ts"],

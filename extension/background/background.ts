@@ -35,18 +35,12 @@ function handleContent(port: chrome.runtime.Port) {
         if (devtoolsPanelPort) {
             devtoolsPanelPort.postMessage(message)
         } else {
-            const developerToolsPort = developerToolsPortMap.get(tabId)
-            if (developerToolsPort) {
-                developerToolsPort.postMessage(createMessage("OpenDevtoolsPanel"))
-            }
+            developerToolsPortMap.get(tabId)?.postMessage(createMessage("OpenDevtoolsPanel"))
         }
     })
     onDisconnect(() => {
         contentPortMap.delete(tabId)
-        const devtoolsPanelPort = panelPortMap.get(tabId)
-        if (devtoolsPanelPort) {
-            devtoolsPanelPort.postMessage(createMessage("PageUnload"))
-        }
+        panelPortMap.get(tabId)?.postMessage(createMessage("PageUnload"))
     })
 }
 

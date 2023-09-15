@@ -6,7 +6,7 @@ if (Reflect.get(window, "__LEPTOS_DEVTOOLS__") === true) {
             "visibilitychange",
             () => {
                 if (document.visibilityState === "visible") {
-                    window.postMessage(createMessage([]))
+                    register_leptos()
                 }
             },
             {
@@ -14,6 +14,17 @@ if (Reflect.get(window, "__LEPTOS_DEVTOOLS__") === true) {
             }
         )
     } else {
-        window.postMessage(createMessage([]))
+        register_leptos()
     }
+}
+
+function register_leptos() {
+    console.log(
+        "🚧%c%s%c%s",
+        "background-color: #ff7f00; color: #fff; border-radius: 3px; padding: 1px 4px",
+        "leptos-devtools",
+        "",
+        " is in early development! Please report any bugs to https://github.com/luoxiaozero/leptos-devtools/issues"
+    )
+    window.postMessage(createMessage([]))
 }
