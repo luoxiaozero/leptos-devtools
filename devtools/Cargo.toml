@@ -3,6 +3,8 @@ name = "leptos_devtools"
 version = { workspace = true }
 edition = "2021"
 authors = ["luoxiaozero"]
+description = "Browser DevTools extension for debugging Leptos applications."
+repository = "http://github.com/luoxiaozero/leptos-devtools"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
