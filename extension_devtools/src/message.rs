@@ -5,6 +5,7 @@ use crate::{
 use chrome_wasm_bindgen::*;
 use leptos::*;
 use leptos_devtools_extension_api::{ComponentChildrenRemove, Event, Message};
+use std::{collections::HashSet, num::NonZeroU64};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 
 pub(crate) fn chrome() -> Option<Chrome> {
@@ -14,10 +15,9 @@ pub(crate) fn chrome() -> Option<Chrome> {
 
 const LEPTOS_DEVTOOLS_PANEL: &str = "LEPTOS_DEVTOOLS_PANEL";
 
-pub(crate) fn on_message(
-    message_component_update: RwSignal<bool>,
-    selected_component_id: RwSignal<Option<SelectedComponentId>>,
-) {
+pub(crate) fn on_message(message_component_update: RwSignal<bool>) {
+    let selected_component_id = expect_context::<RwSignal<Option<SelectedComponentId>>>();
+    let expand_component = expect_context::<RwSignal<HashSet<NonZeroU64>>>();
     let port = chrome().unwrap().runtime().connect_with_connect_info(
         ConnectInfo {
             name: Some(LEPTOS_DEVTOOLS_PANEL),
@@ -42,6 +42,7 @@ pub(crate) fn on_message(
                 Event::PageUnload => {
                     remove_all();
                     selected_component_id.set(None);
+                    expand_component.set(HashSet::new());
                     component_update = true;
                 }
             }
