@@ -12,6 +12,7 @@ thread_local! {
 #[derive(Default)]
 pub(crate) struct Runtime {
     pub cargo_manifest_dir: RefCell<Option<String>>,
+    pub is_memo_view: RefCell<Option<MemoView>>,
 
     pub ancestors: RefCell<Vec<span::Id>>,
     pub owner: RefCell<Option<Owner>>,
@@ -58,6 +59,31 @@ pub(crate) fn remove_component_children(id: &span::Id) {
         children.iter().for_each(|id| {
             remove_component_children(id);
         })
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct MemoView {
+    comp_id: span::Id,
+    pub store_id: Option<String>,
+    pub use_id: Option<String>,
+}
+
+impl MemoView {
+    pub fn new(comp_id: span::Id) -> Self {
+        Self {
+            comp_id,
+            store_id: None,
+            use_id: None,
+        }
+    }
+
+    pub fn is_clear(&self, comp_id: &span::Id) -> bool {
+        if self.comp_id == *comp_id && self.store_id.is_some() && self.use_id.is_some() {
+            true
+        } else {
+            false
+        }
     }
 }
 

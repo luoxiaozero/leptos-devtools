@@ -1,7 +1,7 @@
 use crate::{
     component::Component,
     extension::{generate_extension_component, post_message},
-    runtime::{remove_component_children, with_runtime, Owner},
+    runtime::{remove_component_children, with_runtime, MemoView, Owner},
 };
 use std::fmt::Debug;
 use tracing::{
@@ -36,15 +36,33 @@ where
             return;
         }
 
+        let target = metadata.target();
+
+        with_runtime(|runtime| {
+            if let Some(is_memo_view) = runtime.is_memo_view.borrow_mut().as_mut() {
+                if (name == "Memo::with()" || name == "Memo::get()")
+                    && target == "leptos_reactive::memo"
+                {
+                    let mut visitor = MemoVisitor::default();
+                    attrs.record(&mut visitor);
+                    if visitor.ty == Some("leptos_router::components::routes::RouterState".into()) {
+                        is_memo_view.store_id = visitor.id;
+                    } else if visitor.ty == Some("core::option::Option<leptos_dom::View>".into()) {
+                        is_memo_view.use_id = visitor.id;
+                    }
+                }
+            }
+        });
+
         // whether is component
         if !name.starts_with("<") || !name.ends_with(" />") {
             return;
         }
 
-        if metadata.target() == "leptos_dom::components" && name == "<Component />" {
+        if target == "leptos_dom::components" && name == "<Component />" {
             return;
         }
-        if metadata.target() == "leptos_dom::html" && name == "<HtmlElement />" {
+        if target == "leptos_dom::html" && name == "<HtmlElement />" {
             return;
         }
 
@@ -63,9 +81,13 @@ where
                         metadata.file(),
                         metadata.line(),
                     ),
-                    metadata.target().to_string(),
+                    target.to_string(),
                 ),
             );
+
+            if name == "AnimatedRoutes" && target == "leptos_router::components::routes" {
+                *runtime.is_memo_view.borrow_mut() = Some(MemoView::new(id.clone()));
+            }
 
             let mut owner = runtime.owner.borrow_mut();
             if owner.is_none() {
@@ -118,6 +140,10 @@ where
                 let Some(comp) = components.get(id) else {
                     return;
                 };
+                let mut is_memo_view = runtime.is_memo_view.borrow_mut();
+                if is_memo_view.as_ref().map_or(false, |mv| mv.is_clear(id)) {
+                    *is_memo_view = None
+                }
                 if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child"
                 {
                     true
@@ -180,6 +206,20 @@ impl Visit for PropsVisitor {
     fn record_str(&mut self, field: &Field, value: &str) {
         if field.name() == "props" {
             self.0 = Some(value.to_string());
+        }
+    }
+}
+#[derive(Default, Debug)]
+struct MemoVisitor {
+    id: Option<String>,
+    ty: Option<String>,
+}
+impl Visit for MemoVisitor {
+    fn record_debug(&mut self, field: &Field, value: &dyn Debug) {
+        if field.name() == "id" {
+            self.id = Some(format!("{:?}", value));
+        } else if field.name() == "ty" {
+            self.ty = Some(format!("{:?}", value));
         }
     }
 }
