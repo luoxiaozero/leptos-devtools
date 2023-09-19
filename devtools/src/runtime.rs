@@ -12,9 +12,13 @@ thread_local! {
 #[derive(Default)]
 pub(crate) struct Runtime {
     pub cargo_manifest_dir: RefCell<Option<String>>,
-    pub is_memo_view: RefCell<Option<MemoView>>,
 
-    pub ancestors: RefCell<Vec<span::Id>>,
+    pub is_memo_view: RefCell<Option<MemoView>>,
+    pub store_id: RefCell<HashMap<String, Vec<span::Id>>>,
+    // user_id -> store_id
+    pub use_id: RefCell<HashMap<String, String>>,
+
+    pub ancestors: RefCell<Vec<AncestorId>>,
     pub owner: RefCell<Option<Owner>>,
 
     pub components: RefCell<HashMap<span::Id, Component>>,
@@ -28,6 +32,12 @@ pub(crate) struct Runtime {
 
 pub(crate) fn with_runtime<T>(f: impl FnOnce(&Runtime) -> T) -> T {
     RUNTIME.with(|runtime| f(runtime))
+}
+
+#[derive(PartialEq, Clone, Debug)]
+pub(crate) enum AncestorId {
+    SpanId(span::Id),
+    StoreId(String, span::Id),
 }
 
 #[derive(Debug)]
