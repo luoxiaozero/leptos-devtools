@@ -68,6 +68,9 @@ where
                             runtime.ancestors.borrow_mut().last()
                         {
                             if let Some(ids) = store_id.get_mut(use_id.get(&id).unwrap()) {
+                                if ids.is_empty() {
+                                    return;
+                                }
                                 let ids: Vec<span::Id> = ids.drain(..).collect();
                                 let mut component_tree = runtime.component_tree.borrow_mut();
 
@@ -145,20 +148,19 @@ where
             let mut owner = runtime.owner.borrow_mut();
             if owner.is_none() {
                 let ancestors = runtime.ancestors.borrow_mut();
-                *owner = Some(Owner::new(
-                    id.clone(),
-                    ancestors
-                        .first()
-                        .cloned()
-                        .map(|id| {
-                            if let AncestorId::SpanId(id) = id {
-                                Some(id)
-                            } else {
-                                None
-                            }
-                        })
-                        .flatten(),
-                ));
+                let mut iter = ancestors.iter();
+                let span_id = id;
+                loop {
+                    if let Some(id) = iter.next() {
+                        if let AncestorId::SpanId(id) = id {
+                            *owner = Some(Owner::new(span_id.clone(), Some(id.clone())));
+                            break;
+                        }
+                    } else {
+                        *owner = Some(Owner::new(id.clone(), None));
+                        break;
+                    }
+                }
             }
         });
     }
@@ -188,20 +190,19 @@ where
                     });
 
                     let ancestors = runtime.ancestors.borrow_mut();
-                    *owner = Some(Owner {
-                        id: id.clone(),
-                        parent_id: ancestors
-                            .first()
-                            .cloned()
-                            .map(|id| {
-                                if let AncestorId::SpanId(id) = id {
-                                    Some(id)
-                                } else {
-                                    None
-                                }
-                            })
-                            .flatten(),
-                    });
+                    let mut iter = ancestors.iter();
+                    let span_id = id;
+                    loop {
+                        if let Some(id) = iter.next() {
+                            if let AncestorId::SpanId(id) = id {
+                                *owner = Some(Owner::new(span_id.clone(), Some(id.clone())));
+                                break;
+                            }
+                        } else {
+                            *owner = Some(Owner::new(id.clone(), None));
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -219,6 +220,10 @@ where
                 if let Some(AncestorId::StoreId(.., span_id)) = ancestors.last() {
                     if span_id == id {
                         ancestors.pop();
+                        if ancestors.is_empty() {
+                            let mut owner = runtime.owner.borrow_mut();
+                            owner.take();
+                        }
                         return;
                     }
                 }
