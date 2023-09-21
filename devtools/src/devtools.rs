@@ -165,13 +165,20 @@ where
         });
     }
 
-    fn on_enter(&self, id: &span::Id, _ctx: Context<'_, S>) {
+    fn on_enter(&self, id: &span::Id, ctx: Context<'_, S>) {
         with_runtime(|runtime| {
             let is_dyn_child = {
                 let components = runtime.components.borrow();
                 let Some(comp) = components.get(id) else {
                     return;
                 };
+                if !ctx
+                    .metadata(id)
+                    .map_or(false, |v| v.name() == format!("<{} />", comp.name()))
+                {
+                    return;
+                }
+
                 if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child"
                 {
                     true
@@ -231,6 +238,12 @@ where
                 let Some(comp) = components.get(id) else {
                     return;
                 };
+                if !ctx
+                    .metadata(id)
+                    .map_or(false, |v| v.name() == format!("<{} />", comp.name()))
+                {
+                    return;
+                }
                 let mut is_memo_view = runtime.is_memo_view.borrow_mut();
                 if is_memo_view.as_ref().map_or(false, |mv| mv.is_clear(id)) {
                     let MemoView {
