@@ -1,7 +1,7 @@
 use crate::{
     component::Component,
     extension::{generate_extension_component, post_message},
-    runtime::{remove_component_children, with_runtime, MemoView, Owner},
+    runtime::{remove_component_children, with_runtime, AncestorId, MemoView, Owner},
 };
 use std::fmt::Debug;
 use tracing::{
@@ -27,7 +27,7 @@ where
             attrs.record(&mut visitor);
 
             with_runtime(|runtime| {
-                if let Some(comp_id) = runtime.ancestors.borrow().last() {
+                if let Some(AncestorId::SpanId(comp_id)) = runtime.ancestors.borrow().last() {
                     if let Some(comp) = runtime.components.borrow_mut().get_mut(comp_id) {
                         comp.set_props(visitor.0);
                     }
@@ -39,6 +39,62 @@ where
         let target = metadata.target();
 
         with_runtime(|runtime| {
+            let mut store_id = runtime.store_id.borrow_mut();
+            if !store_id.is_empty()
+                && (name == "Memo::with()" || name == "Memo::get()")
+                && target == "leptos_reactive::memo"
+            {
+                let span_id = id;
+                let mut visitor = MemoVisitor::default();
+                attrs.record(&mut visitor);
+                if let MemoVisitor {
+                    id: Some(id),
+                    ty: Some(ty),
+                } = visitor
+                {
+                    let use_id = runtime.use_id.borrow();
+                    if &ty == "leptos_router::components::routes::RouterState"
+                        && store_id.contains_key(&id)
+                    {
+                        runtime
+                            .ancestors
+                            .borrow_mut()
+                            .push(AncestorId::StoreId(id, span_id.clone()));
+                        return;
+                    } else if &ty == "core::option::Option<leptos_dom::View>"
+                        && use_id.contains_key(&id)
+                    {
+                        if let Some(AncestorId::SpanId(parent_id)) =
+                            runtime.ancestors.borrow_mut().last()
+                        {
+                            if let Some(ids) = store_id.get_mut(use_id.get(&id).unwrap()) {
+                                if ids.is_empty() {
+                                    return;
+                                }
+                                let ids: Vec<span::Id> = ids.drain(..).collect();
+                                let mut component_tree = runtime.component_tree.borrow_mut();
+
+                                if let Some(children) = component_tree.get_mut(parent_id) {
+                                    children.append(&mut ids.clone());
+                                }
+                                drop(component_tree);
+                                post_message(|| {
+                                    ids.iter()
+                                        .map(|id| {
+                                            generate_extension_component(
+                                                &id,
+                                                Some(parent_id.clone()),
+                                            )
+                                        })
+                                        .collect::<Vec<_>>()
+                                });
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+
             if let Some(is_memo_view) = runtime.is_memo_view.borrow_mut().as_mut() {
                 if (name == "Memo::with()" || name == "Memo::get()")
                     && target == "leptos_reactive::memo"
@@ -92,18 +148,37 @@ where
             let mut owner = runtime.owner.borrow_mut();
             if owner.is_none() {
                 let ancestors = runtime.ancestors.borrow_mut();
-                *owner = Some(Owner::new(id.clone(), ancestors.first().cloned()));
+                let mut iter = ancestors.iter();
+                let span_id = id;
+                loop {
+                    if let Some(id) = iter.next() {
+                        if let AncestorId::SpanId(id) = id {
+                            *owner = Some(Owner::new(span_id.clone(), Some(id.clone())));
+                            break;
+                        }
+                    } else {
+                        *owner = Some(Owner::new(id.clone(), None));
+                        break;
+                    }
+                }
             }
         });
     }
 
-    fn on_enter(&self, id: &span::Id, _ctx: Context<'_, S>) {
+    fn on_enter(&self, id: &span::Id, ctx: Context<'_, S>) {
         with_runtime(|runtime| {
             let is_dyn_child = {
                 let components = runtime.components.borrow();
                 let Some(comp) = components.get(id) else {
                     return;
                 };
+                if !ctx
+                    .metadata(id)
+                    .map_or(false, |v| v.name() == format!("<{} />", comp.name()))
+                {
+                    return;
+                }
+
                 if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child"
                 {
                     true
@@ -122,27 +197,66 @@ where
                     });
 
                     let ancestors = runtime.ancestors.borrow_mut();
-                    *owner = Some(Owner {
-                        id: id.clone(),
-                        parent_id: ancestors.first().cloned(),
-                    });
+                    let mut iter = ancestors.iter();
+                    let span_id = id;
+                    loop {
+                        if let Some(id) = iter.next() {
+                            if let AncestorId::SpanId(id) = id {
+                                *owner = Some(Owner::new(span_id.clone(), Some(id.clone())));
+                                break;
+                            }
+                        } else {
+                            *owner = Some(Owner::new(id.clone(), None));
+                            break;
+                        }
+                    }
                 }
             }
 
-            runtime.ancestors.borrow_mut().push(id.clone());
+            runtime
+                .ancestors
+                .borrow_mut()
+                .push(AncestorId::SpanId(id.clone()));
         });
     }
 
     fn on_exit(&self, id: &span::Id, ctx: Context<'_, S>) {
         with_runtime(|runtime| {
             let is_dyn_child = {
+                let mut ancestors = runtime.ancestors.borrow_mut();
+                if let Some(AncestorId::StoreId(.., span_id)) = ancestors.last() {
+                    if span_id == id {
+                        ancestors.pop();
+                        if ancestors.is_empty() {
+                            let mut owner = runtime.owner.borrow_mut();
+                            owner.take();
+                        }
+                        return;
+                    }
+                }
                 let components = runtime.components.borrow();
                 let Some(comp) = components.get(id) else {
                     return;
                 };
+                if !ctx
+                    .metadata(id)
+                    .map_or(false, |v| v.name() == format!("<{} />", comp.name()))
+                {
+                    return;
+                }
                 let mut is_memo_view = runtime.is_memo_view.borrow_mut();
                 if is_memo_view.as_ref().map_or(false, |mv| mv.is_clear(id)) {
-                    *is_memo_view = None
+                    let MemoView {
+                        store_id, use_id, ..
+                    } = is_memo_view.take().unwrap();
+                    runtime
+                        .use_id
+                        .borrow_mut()
+                        .insert(use_id.unwrap(), store_id.clone().unwrap());
+                    runtime
+                        .store_id
+                        .borrow_mut()
+                        .insert(store_id.unwrap(), vec![]);
                 }
                 if comp.name() == "DynChild" && comp.target() == "leptos_dom::components::dyn_child"
                 {
@@ -165,13 +279,31 @@ where
                 }
 
                 let mut owner = runtime.owner.borrow_mut();
-                if let Some(Owner { id, parent_id }) = owner.take() {
+                if let Some(Owner { id, mut parent_id }) = owner.take() {
+                    if parent_id.is_none() {
+                        if let Some(mut loop_span) = ctx.span(&id) {
+                            let components = runtime.components.borrow();
+                            loop {
+                                let Some(span) = loop_span.parent() else {
+                                    break;
+                                };
+                                if let Some(comp) = components.get(&span.id()) {
+                                    if format!("<{} />", comp.name()) == span.metadata().name() {
+                                        parent_id = Some(span.id());
+                                        break;
+                                    }
+                                }
+
+                                loop_span = span;
+                            }
+                        }
+                    }
                     post_message(|| generate_extension_component(&id, parent_id));
                 }
                 return;
             }
 
-            if ancestors.contains(id) {
+            if ancestors.contains(&AncestorId::SpanId(id.clone())) {
                 return;
             }
 
@@ -188,11 +320,21 @@ where
             }
             if !component_tree_set.contains(id) {
                 let parent_id = ancestors.last().expect("ancestors is empty");
-                let mut component_tree = runtime.component_tree.borrow_mut();
-                if let Some(children) = component_tree.get_mut(parent_id) {
-                    children.push(id.clone());
-                } else {
-                    component_tree.insert(parent_id.clone(), vec![id.clone()]);
+                match parent_id {
+                    AncestorId::SpanId(parent_id) => {
+                        let mut component_tree = runtime.component_tree.borrow_mut();
+                        if let Some(children) = component_tree.get_mut(parent_id) {
+                            children.push(id.clone());
+                        } else {
+                            component_tree.insert(parent_id.clone(), vec![id.clone()]);
+                        }
+                    }
+                    AncestorId::StoreId(parent_id, ..) => {
+                        let mut store_id = runtime.store_id.borrow_mut();
+                        if let Some(children) = store_id.get_mut(parent_id) {
+                            children.push(id.clone());
+                        }
+                    }
                 }
                 component_tree_set.insert(id.clone());
             }
