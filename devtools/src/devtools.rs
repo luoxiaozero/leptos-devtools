@@ -279,7 +279,25 @@ where
                 }
 
                 let mut owner = runtime.owner.borrow_mut();
-                if let Some(Owner { id, parent_id }) = owner.take() {
+                if let Some(Owner { id, mut parent_id }) = owner.take() {
+                    if parent_id.is_none() {
+                        if let Some(mut loop_span) = ctx.span(&id) {
+                            let components = runtime.components.borrow();
+                            loop {
+                                let Some(span) = loop_span.parent() else {
+                                    break;
+                                };
+                                if let Some(comp) = components.get(&span.id()) {
+                                    if format!("<{} />", comp.name()) == span.metadata().name() {
+                                        parent_id = Some(span.id());
+                                        break;
+                                    }
+                                }
+
+                                loop_span = span;
+                            }
+                        }
+                    }
                     post_message(|| generate_extension_component(&id, parent_id));
                 }
                 return;
