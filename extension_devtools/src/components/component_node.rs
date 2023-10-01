@@ -47,7 +47,7 @@ fn Indent(level: u64) -> impl IntoView {
             <For
                 each=move || 0..level
                 key=|num| num.clone()
-                view=|_num| {
+                children=|_num| {
                     view! { <span class="inline-block w-16px"></span> }
                 }
             />

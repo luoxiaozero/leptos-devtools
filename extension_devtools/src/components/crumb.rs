@@ -28,7 +28,7 @@ pub fn Crumb(aside_width: RwSignal<i32>) -> impl IntoView {
             <For
                 each=move || crumbs.get()
                 key=|crumb| crumb.id.clone()
-                view=move |crumb| {
+                children=move |crumb| {
                     let ComponentCrumb { id, name } = crumb;
                     let on_click = move |_| {
                         selected_comp_id.set(Some(SelectedComponentId(id)));
