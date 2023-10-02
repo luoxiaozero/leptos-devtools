@@ -61,7 +61,7 @@ fn App() -> impl IntoView {
                     <For
                         each=move || nodes_filter.get()
                         key=|node| node.id.clone()
-                        view=|node| {
+                        children=|node| {
                             let Node { id, name, level } = node;
                             view! {
                                 <ComponentNode id name level/>
